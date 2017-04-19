@@ -67,7 +67,7 @@ The saveScreenShot is for taking screenshot. If you want to take a screenshot, j
 ```
 private static extern void saveScreenshot(IntPtr texture, string path, bool needsFlipping);
 ```
-## Native Engine Integration
+## Native Engine Integration (Interface and DLL/Lib to be uploaded soon)
 First we need to pass dx11 device pointer to dll and it will be used for setting the relevant encoding SDK for your hardware (AMD vs NVIDIA).
 ```
 /**
