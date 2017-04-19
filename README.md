@@ -123,3 +123,10 @@ It will take screenshot and you should set file format as JPEG for the fullSaveP
 	DllExport void SaveScreenShot(const void* texturePtr, const TCHAR* fullSavePath, bool needFlipping);
 };
 ```
+# Join the 360 Capture SDK community
+
+Please use our issues page to let us know of any problems or feedback.
+
+# License
+
+360 Capture SDK is BSD-licensed. We also provide an additional patent grant.
