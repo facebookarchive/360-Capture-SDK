@@ -12,15 +12,15 @@ namespace FBCapture
     public class NonSurroundCapture : MonoBehaviour
     {
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void startEncoding(IntPtr texture, string path, bool isLive, int fps, bool needFlipping);
+        private static extern bool startEncoding(IntPtr texture, string path, bool isLive, int fps, bool needFlipping);
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void audioEncoding();
+        private static extern bool audioEncoding();
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void stopEncoding();
+        private static extern bool stopEncoding();
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void muxingData();
+        private static extern bool muxingData();
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void saveScreenShot(IntPtr texture, string path, bool needFlipping);
+        private static extern bool saveScreenShot(IntPtr texture, string path, bool needFlipping);
 
         public static NonSurroundCapture singleton;
 
@@ -126,15 +126,21 @@ namespace FBCapture
             if (fpsTimer >= fps) {
                 fpsTimer = 0.0f;
                 if (encodingStart) {
-                    startEncoding(renderTexture.GetNativeTexturePtr(), videoFullPath, liveStreaming, videoFPS, true);
+                    if (!startEncoding(renderTexture.GetNativeTexturePtr(), videoFullPath, liveStreaming, videoFPS, true)) {
+                        Debug.Log("Failed to start encoding. Please check FBCaptureSDK.log file");
+                    }
 
                     if (flushTimer > flushCycle && liveStreaming) {  // [Live] flush input buffers based on flush cycle value
                         flushTimer = 0.0f;
-                        stopEncoding();
+                        if (!stopEncoding()) {
+                            Debug.Log("Failed to finalize inputs. Please check FBCaptureSDK.log file");
+                        }
                         flushReady = true;
                     }
                     else if (encodingStop && !liveStreaming) {  // flush input buffers when got stop input                                                
-                        stopEncoding();
+                        if (!stopEncoding()) {
+                            Debug.Log("Failed to finalize inputs. Please check FBCaptureSDK.log file");
+                        }
                         flushReady = true;
                     }
                 }
@@ -215,7 +221,9 @@ namespace FBCapture
             yield return new WaitForEndOfFrame();
 
             Debug.LogFormat("[NonSurroundCapture] Saved {0} x {1} screenshot: {2}", width, height, screenshotFullPath);
-            saveScreenShot(renderTexture.GetNativeTexturePtr(), screenshotFullPath, true);
+            if(!saveScreenShot(renderTexture.GetNativeTexturePtr(), screenshotFullPath, true)) {
+                Debug.Log("Failed on taking screenshot. Please check FBCaptureSDK.log file");
+            }
         }
 
         void SetOutputSize(int width, int height)

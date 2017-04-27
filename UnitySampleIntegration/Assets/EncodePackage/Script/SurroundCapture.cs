@@ -12,15 +12,15 @@ namespace FBCapture
     public class SurroundCapture : MonoBehaviour
     {
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void startEncoding(IntPtr texture, string path, bool isLive, int fps, bool needFlipping);
+        private static extern bool startEncoding(IntPtr texture, string path, bool isLive, int fps, bool needFlipping);
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void audioEncoding();
+        private static extern bool audioEncoding();
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void stopEncoding();
+        private static extern bool stopEncoding();
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void muxingData();
+        private static extern bool muxingData();
         [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        private static extern void saveScreenShot(IntPtr texture, string path, bool needFlipping);                
+        private static extern bool saveScreenShot(IntPtr texture, string path, bool needFlipping);                
 
         public static SurroundCapture singleton;
 
@@ -58,17 +58,8 @@ namespace FBCapture
 
         private bool encodingStart = false;
         private bool encodingStop = false;
-        private bool needToStopEncoding = false;
-        
-        // video file name             
-        private string videoName;
-
-        // Screenshot file name: Format should be jpg!!
-        private string screenshotName;
-
-        //  Path where files will be saved          
-        private string saveFolder;
-
+        private bool needToStopEncoding = false;        
+      
         // Full path string of encoded moive         
         private string videoFullPath;
 
@@ -149,7 +140,9 @@ namespace FBCapture
         {
             while (true) {
                 threadResume.WaitOne(Timeout.Infinite);
-                muxingData();
+                if (!muxingData()) {
+                    Debug.Log("Failed on mxuing video and audio data. Please check FBCaptureSDK.log file");                    
+                }
                 threadResume.Reset();
             }
         }
@@ -161,7 +154,9 @@ namespace FBCapture
                     threadResume.Reset();
                 }
                 if (encodingStart && !needToStopEncoding) {                    
-                    audioEncoding();
+                    if(!audioEncoding()) {
+                        Debug.Log("Failed on audio encoding. Please check FBCaptureSDK.log file");
+                    }
                 }
                 Thread.Sleep(10);
             }
@@ -218,15 +213,21 @@ namespace FBCapture
                         sceneCamera.RenderToCubemap(cubemapTex);  // render cubemap
                     }
 
-                    startEncoding(externalTex.GetNativeTexturePtr(), videoFullPath, liveStreaming, videoFPS, false);
+                    if(!startEncoding(externalTex.GetNativeTexturePtr(), videoFullPath, liveStreaming, videoFPS, false)) {
+                        Debug.Log("Failed to start encoding. Please check FBCaptureSDK.log file");
+                    }
 
                     if (flushTimer > flushCycle && liveStreaming) {  // [Live] flush input buffers based on flush cycle value
                         flushTimer = 0.0f;
-                        stopEncoding();
+                        if(!stopEncoding()) {
+                            Debug.Log("Failed to finalize inputs. Please check FBCaptureSDK.log file");
+                        }
                         flushReady = true;
                     }
                     else if (encodingStop && !liveStreaming)  {  // flush input buffers when got stop input                                                
-                        stopEncoding();
+                        if (!stopEncoding()) {
+                            Debug.Log("Failed to finalize inputs. Please check FBCaptureSDK.log file");
+                        }
                         flushReady = true;
                     }
                 }
@@ -234,7 +235,7 @@ namespace FBCapture
                 // Muxing
                 if (flushReady && !liveStreaming) {  // Flush inputs and Stop encoding
                     flushReady = false;
-                    encodingStart = false;
+                    encodingStart = false;                    
                     threadResume.Set();
                 }
                 else if (flushReady && liveStreaming) {  // Restart encoding after flush
@@ -298,7 +299,9 @@ namespace FBCapture
             yield return new WaitForEndOfFrame();
 
             Debug.LogFormat("[SurroundCapture] Saved {0} x {1} screenshot: {2}", width, height, screenshotFullPath);
-            saveScreenShot(externalTex.GetNativeTexturePtr(), screenshotFullPath, false);         
+            if(!saveScreenShot(externalTex.GetNativeTexturePtr(), screenshotFullPath, false)) {
+                Debug.Log("Failed on taking screenshot. Please check FBCaptureSDK.log file");
+            }         
         }
 
         // Take screenshot
