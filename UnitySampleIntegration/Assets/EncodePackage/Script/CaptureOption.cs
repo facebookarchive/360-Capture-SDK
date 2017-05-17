@@ -9,7 +9,7 @@ namespace FBCapture
     public class CaptureOption : MonoBehaviour
     {      
         [Header("Capture Option")]
-        public bool doSurroundCapture;
+        public bool doSurroundCapture;        
 
         [Header("Capture Hotkeys")]
         public KeyCode screenShotKey = KeyCode.None;
@@ -27,7 +27,23 @@ namespace FBCapture
         
         public string outputPath;  // Path where created files will be saved 
         private bool liveStreaming = false; // Set false by force because not fully implemented
-        
+        private bool myCaptureOption;
+
+        private bool captureOption
+        {                
+            set {
+                if (myCaptureOption == value)
+                    return;
+
+                myCaptureOption = value;
+
+                surroundCapture.enabled = doSurroundCapture;
+                nonSurroundCapture.enabled = !doSurroundCapture;
+                surroundCapture.isLiveStreaming = doSurroundCapture && liveStreaming;
+                nonSurroundCapture.isLiveStreaming = !doSurroundCapture && liveStreaming;
+            }
+        }        
+
         void Start()
         {            
             if (string.IsNullOrEmpty(outputPath)) {
@@ -41,20 +57,19 @@ namespace FBCapture
             surroundCapture = GetComponent<SurroundCapture>();
             nonSurroundCapture = GetComponent<NonSurroundCapture>();
 
-            if (doSurroundCapture) {               
-                surroundCapture.enabled = true;
-                nonSurroundCapture.enabled = false;
-                surroundCapture.isLiveStreaming = liveStreaming;
-            }
-            else {
-                nonSurroundCapture.enabled = true;
-                surroundCapture.enabled = false;
-                nonSurroundCapture.isLiveStreaming = liveStreaming;
-            }
+            surroundCapture.enabled = doSurroundCapture;
+            nonSurroundCapture.enabled = !doSurroundCapture;
+            surroundCapture.isLiveStreaming = doSurroundCapture && liveStreaming;
+            nonSurroundCapture.isLiveStreaming = !doSurroundCapture && liveStreaming;
+
+            myCaptureOption = doSurroundCapture;
         }
 
         void Update()
         {
+            // Check in realtime if capture option is changed
+            captureOption = doSurroundCapture;
+ 
             // 360 screen capturing
             if (Input.GetKeyDown(screenShotKey) && doSurroundCapture) {
                 surroundCapture.TakeScreenshot(screenShotWidth, screenShotHeight, ScreenShotName(screenShotWidth, screenShotHeight));

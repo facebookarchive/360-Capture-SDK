@@ -11,26 +11,28 @@ namespace FBCapture
     [RequireComponent(typeof(Camera))]
     public class NonSurroundCapture : MonoBehaviour
     {
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool startEncoding(IntPtr texture, string path, bool isLive, int fps, bool needFlipping);
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool audioEncoding();
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool stopEncoding();
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool muxingData();
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool saveScreenShot(IntPtr texture, string path, bool needFlipping);
 
         public static NonSurroundCapture singleton;
 
-        public RenderTexture renderTexture;
+        private RenderTexture renderTexture;
 
         private bool encodingStart = false;
         private bool encodingStop = false;
         private bool needToStopEncoding = false;
 
         private int lastWidth = 0, lastHeight = 0;
+        private int captureWidth = 2048;
+        private int captureHeight = 1024;
 
         // video file name             
         private string videoName;
@@ -52,6 +54,9 @@ namespace FBCapture
         private ManualResetEvent threadShutdown;
         private Thread flushThread;
         private Thread audioThread;
+
+        [Tooltip("Reference to camera that renders the scene")]
+        public Camera sceneCamera;
 
         // It sets video FPS
         int videoFPS = 30;
@@ -76,6 +81,8 @@ namespace FBCapture
                 return;
             }
             singleton = this;
+
+            SetOutputSize(captureWidth, captureHeight);            
         }
 
         void Start()
@@ -86,8 +93,7 @@ namespace FBCapture
 
         private void MuxingThread()
         {
-            while (true)
-            {
+            while (true) {
                 threadResume.WaitOne(Timeout.Infinite);
                 muxingData();
                 threadResume.Reset();
@@ -96,14 +102,11 @@ namespace FBCapture
 
         private void AudioThread()
         {
-            while (true)
-            {
-                if (needToStopEncoding)
-                {
+            while (true) {
+                if (needToStopEncoding) {
                     threadResume.Reset();
                 }
-                if (encodingStart && !needToStopEncoding)
-                {
+                else if (encodingStart && !needToStopEncoding) {
                     audioEncoding();
                 }
                 Thread.Sleep(10);
@@ -124,7 +127,7 @@ namespace FBCapture
             fpsTimer += Time.deltaTime;
 
             if (fpsTimer >= fps) {
-                fpsTimer = 0.0f;
+                fpsTimer -= fps;
                 if (encodingStart) {
                     if (!startEncoding(renderTexture.GetNativeTexturePtr(), videoFullPath, liveStreaming, videoFPS, true)) {
                         Debug.Log("Failed to start encoding. Please check FBCaptureSDK.log file");
@@ -169,10 +172,16 @@ namespace FBCapture
             }
 
             if (!encodingStart) {
-                //SetOutputSize(width, height);
-                Debug.LogFormat("[NonSurroundCapture] Starting encoder {0} x {1}: {2}", width, height, videoFullPath);
+                if (SetOutputSize(width, height)) {                    
+                    Debug.LogFormat("[NonSurroundCapture] Starting encoder {0} x {1}: {2}", width, height, videoFullPath);                    
+                }
+                else {
+                    Debug.LogFormat("Start Encoding is failed by invalid resolution: {0} x {1}", width, height);
+                    return;
+                }
             }
             else {
+                Debug.Log("Encoding is already started");
                 return;
             }
 
@@ -212,34 +221,52 @@ namespace FBCapture
                 screenshotFullPath = screenshotPathName;
             }
 
-            StartCoroutine(CaptureScreenshot(width, height));
+            if (SetOutputSize(width, height)) {
+                StartCoroutine(CaptureScreenshot(width, height));
+            }
         }
 
         IEnumerator CaptureScreenshot(int width, int height)
         {
+            SetOutputSize(width, height);
             // yield a frame to re-render into the rendertexture
             yield return new WaitForEndOfFrame();
-
-            Debug.LogFormat("[NonSurroundCapture] Saved {0} x {1} screenshot: {2}", width, height, screenshotFullPath);
-            if(!saveScreenShot(renderTexture.GetNativeTexturePtr(), screenshotFullPath, true)) {
+                        
+            if (!saveScreenShot(renderTexture.GetNativeTexturePtr(), screenshotFullPath, true)) {
                 Debug.Log("Failed on taking screenshot. Please check FBCaptureSDK.log file");
             }
+
+            Debug.LogFormat("[NonSurroundCapture] Saved {0} x {1} screenshot: {2}", width, height, screenshotFullPath);
         }
 
-        void SetOutputSize(int width, int height)
+        bool SetOutputSize(int width, int height)
         {
-            if (width == lastWidth && height == lastHeight) {
-                return;
+            if (width == 0 || height == 0) {
+                Debug.Log("The width and height shouldn't be zero");
+                return false;
             }
-            else {
-                lastWidth = width;
-                lastHeight = height;
+            else if (!CheckPowerOfTwo(width, height)) {
+                Debug.Log("The width and height should be power of two in Non SurrondCapture");
+                return false;
             }
 
-            renderTexture = new RenderTexture(width, height, 0);
+            renderTexture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);            
+            sceneCamera.targetTexture = renderTexture;
+
+            return true;
         }
 
-        void OnApplicationQuit()
+        bool CheckPowerOfTwo(int width, int height)
+        {
+            return (width & (width - 1)) == 0 && (height & (height -1)) == 0;
+        }
+
+        void OnDestroy()
+        {
+            DestroyImmediate(renderTexture);
+        }
+
+            void OnApplicationQuit()
         {
             if (encodingStart) {
                 stopEncoding();

@@ -11,15 +11,15 @@ namespace FBCapture
     [RequireComponent(typeof(Camera))]
     public class SurroundCapture : MonoBehaviour
     {
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool startEncoding(IntPtr texture, string path, bool isLive, int fps, bool needFlipping);
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool audioEncoding();
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool stopEncoding();
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool muxingData();
-        [DllImport("HWEncoder", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern bool saveScreenShot(IntPtr texture, string path, bool needFlipping);                
 
         public static SurroundCapture singleton;
@@ -153,7 +153,7 @@ namespace FBCapture
                 if (needToStopEncoding) {
                     threadResume.Reset();
                 }
-                if (encodingStart && !needToStopEncoding) {                    
+                else if (encodingStart && !needToStopEncoding) {                    
                     if(!audioEncoding()) {
                         Debug.Log("Failed on audio encoding. Please check FBCaptureSDK.log file");
                     }
@@ -186,9 +186,11 @@ namespace FBCapture
         void OnDestroy()
         {
             DestroyImmediate(cubemapTex);
-            DestroyImmediate(outputTex);            
+            DestroyImmediate(outputTex);
+            DestroyImmediate(externalTex);      
             DestroyImmediate(convertMaterial);
             DestroyImmediate(downSampleMaterial);
+            DestroyImmediate(outputCubemapMaterial);
         }
 
         void Update()
@@ -205,7 +207,7 @@ namespace FBCapture
             fpsTimer += Time.deltaTime;
            
             if (fpsTimer >= fps) {
-                fpsTimer = 0.0f;              
+                fpsTimer -= fps;              
 
                 if (encodingStart) {
                     if (sceneCamera) {
@@ -260,6 +262,7 @@ namespace FBCapture
                 Debug.LogFormat("[SurroundCapture] Starting encoder {0} x {1}: {2}", width, height, videoFullPath);
             }
             else {
+                Debug.Log("Encoding is already started");
                 return;
             }
 
@@ -284,7 +287,7 @@ namespace FBCapture
                 audioThread = new Thread(AudioThread);
                 audioThread.Start();
             }
-        }
+        } 
 
         // Stop video encoding
         public void StopEncodingVideo()
@@ -433,16 +436,14 @@ namespace FBCapture
             RenderCubeFace(CubemapFace.NegativeZ, s * 2.0f, 0.0f, s, 0.5f);
 
             Graphics.SetRenderTarget(null);
-            Graphics.Blit(outputTex, externalTex);
-            Graphics.Blit(outputTex, dest);
+            Graphics.Blit(outputTex, externalTex);            
             Debug.Log("DisplayCubeMap");
         }
 
         void DisplayEquirect(RenderTexture dest)
         {
             SetMaterialParameters(convertMaterial);
-            Graphics.Blit(null, externalTex, convertMaterial);
-            Graphics.Blit(externalTex, dest);
+            Graphics.Blit(null, externalTex, convertMaterial);            
         }
 
         void OnRenderImage(RenderTexture src, RenderTexture dest)
