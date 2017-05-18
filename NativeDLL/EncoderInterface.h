@@ -1,8 +1,8 @@
 /****************************************************************************************************************
 
-Filename	:	EncoderWrapper.h
+Filename	:	EncoderInterface.h
 Content		:	Encoder implementation for creating video
-Created		:	April 24, 2017
+Created		:	May 18, 2017
 
 ****************************************************************************************************************/
 
@@ -16,7 +16,7 @@ sample.cpp
 typedef EncoderInterface* (__cdecl *encoderFactory)();
 
 int main(){
-HINSTANCE dllHandle = ::LoadLibrary(TEXT("HWEncoder.dll"));
+HINSTANCE dllHandle = ::LoadLibrary(TEXT("FBCapture.dll"));
 if (!dllHandle) {
 	cout << "Failed to load DLL";
 	return -1;
@@ -69,27 +69,27 @@ public:
 	* @param fps			  Set video fps and encourage setting it to 30 fps
 	* @param needFlipping	  true if you want to flip pixels vertically
 	*/
-	virtual void StartEncoding(const void* texturePtr, const TCHAR* fullSavePath, bool isLive, int fps, bool needFlipping) = 0;
+	virtual bool StartEncoding(const void* texturePtr, const TCHAR* fullSavePath, bool isLive, int fps, bool needFlipping) = 0;
 
 	/**
 	* Capture audio
 	* - It needs to be called every frame
 	* - It will generate wav file
 	*/
-	virtual void AudioEncoding() = 0;
+	virtual bool AudioEncoding() = 0;
 
 	/**
 	* Flushing all input video and audio data
 	* - It needs to be called when you want to finish encoding
 	*/
-	virtual void StopEncoding() = 0;
+	virtual bool StopEncoding() = 0;
 
 	/**
 	* Mux audio and video with audio transcoding(wav->aac)
 	* - It needs to be called right after StopEncoding
 	* - It will generate .mp4 which is final file format
 	*/
-	virtual void MuxingData() = 0;
+	virtual bool MuxingData() = 0;
 
 	/**
 	* Take Screenshot
@@ -98,7 +98,7 @@ public:
 	* @param fullSavePath     image save folder path including file name
 	* @param needFlipping	  true if you want to flip pixels vertically
 	*/
-	virtual void SaveScreenShot(const void* texturePtr, const TCHAR* fullSavePath, bool needFlipping) = 0;
+	virtual bool SaveScreenShot(const void* texturePtr, const TCHAR* fullSavePath, bool needFlipping) = 0;
 
 	/**
 	* Destroy instance created for accessing interfaces
