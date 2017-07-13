@@ -125,7 +125,7 @@ It will take screenshot and you should set file format as JPEG for the fullSaveP
 ```
 # Join the 360 Capture SDK community
 
-Please use our issues page to let us know of any problems or feedback.
+Please use our issues page to let us know of any problems or feedback. If you are working on a project using the 360 Capture SDK, please reach out to cg439/cpgupta@fb.com for potential opportunities to feature your work as created by the SDK.
 
 # License
 
