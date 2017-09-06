@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ScreenGrab.cpp" />
+    <ClCompile Include="..\AMD\common\AMFFactory.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\AMFSTL.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamFactory.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamFile.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamMemory.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\Thread.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\TraceAdapter.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\Windows\ThreadWindows.cpp">
+      <Filter>AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="NVEncoder.cpp" />
+    <ClCompile Include="EncoderMain.cpp" />
+    <ClCompile Include="AMDEncoder.cpp" />
+    <ClCompile Include="AudioCapture.cpp" />
+    <ClCompile Include="AudioEncoder.cpp" />
+    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="MP4muxer.cpp" />
+    <ClCompile Include="FLVmuxer.cpp" />
+    <ClCompile Include="LibRTMP.cpp" />
+    <ClCompile Include="AudioBuffer.cpp" />
+    <ClCompile Include="..\NVidia\common\src\NvHWEncoder.cpp">
+      <Filter>NVIDIA</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ScreenGrab.h" />
+    <ClInclude Include="..\AMD\common\AMFFactory.h">
+      <Filter>AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\AMFSTL.h">
+      <Filter>AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStreamFile.h">
+      <Filter>AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStreamMemory.h">
+      <Filter>AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\Thread.h">
+      <Filter>AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\TraceAdapter.h">
+      <Filter>AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="NVEncoder.h" />
+    <ClInclude Include="AMDEncoder.h" />
+    <ClInclude Include="AudioCapture.h" />
+    <ClInclude Include="AudioEncoder.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="MP4muxer.h" />
+    <ClInclude Include="FLVmuxer.h" />
+    <ClInclude Include="LibRTMP.h" />
+    <ClInclude Include="AudioBuffer.h" />
+    <ClInclude Include="..\NVidia\common\inc\NvHWEncoder.h">
+      <Filter>NVIDIA</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorCodes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="AMD">
+      <UniqueIdentifier>{d94e710b-a7d4-476f-8e36-69a82d21443a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AMD\public">
+      <UniqueIdentifier>{2311bd51-14cb-4edd-94b0-3ae81eda2b66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AMD\public\common">
+      <UniqueIdentifier>{4b6b6b2f-d63c-4eaf-a893-8738b2e9c9dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NVIDIA">
+      <UniqueIdentifier>{2dd09f78-05fa-49e3-a86f-20381b0d9f7e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
