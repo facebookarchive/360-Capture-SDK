@@ -20,13 +20,13 @@ We support both AMD and NVIDIA GPU hardware in terms of compatibility with this 
 
 ## Detailed Hardware Compatibility
 * **NVidia**
-    * Operating System: Windows 7, 8, 10, Server 2008 R2, Server 2012
+    * Operating System (x64 only): Windows 8, 10, Server 2008 R2, Server 2012
     * GPU: NVIDIA Quadro, Tesla, GRID or GeForce products with Kepler, Maxwell and Pascal generation GPUs. 
     * NVidia Windows display driver: 375.95 or newer
 
 
 * **AMD**
-    * Operating System: Windows 7, 8, 10
+    * Operating System (x64 only): Windows 8, 10
     * GPU: AMD GPUs supporting following driver
     * AMD Windows display driver: AMD Radeon Software Crimson 17.1.1 or later
 
@@ -67,7 +67,7 @@ The saveScreenShot is for taking screenshot. If you want to take a screenshot, j
 ```
 private static extern void saveScreenshot(IntPtr texture, string path, bool needsFlipping);
 ```
-## Native Engine Integration (Interface and DLL/Lib to be uploaded soon)
+## Native Engine Integration
 First we need to pass dx11 device pointer to dll and it will be used for setting the relevant encoding SDK for your hardware (AMD vs NVIDIA).
 ```
 /**
@@ -123,6 +123,9 @@ It will take screenshot and you should set file format as JPEG for the fullSaveP
 	DllExport void SaveScreenShot(const void* texturePtr, const TCHAR* fullSavePath, bool needFlipping);
 };
 ```
+# Building FBCapture.dll source
+Please refer to: https://github.com/facebook/360-Capture-SDK/releases for instructions on steps one needs to follow for building the dll on their own.
+
 # Join the 360 Capture SDK community
 
 Please use our issues page to let us know of any problems or feedback. If you are working on a project using the 360 Capture SDK, please reach out to cg439/cpgupta@fb.com for potential opportunities to feature your work as created by the SDK.
