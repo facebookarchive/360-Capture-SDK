@@ -30,10 +30,10 @@ bld/
 [Oo]bj/
 [Ll]og/
 
-FBCapture/Wamedia/common/lib/*
-FBCapture/Wamedia/flvmuxer/lib/*
-FBCapture/Wamedia/mp4muxer/lib/*
-FBCapture/Wamedia/streams/lib/*
+Wamedia/common/lib/
+Wamedia/flvmuxer/lib/
+Wamedia/mp4muxer/lib/
+Wamedia/streams/lib/
 
 # Visual Studio 2015 cache/options directory
 .vs/
