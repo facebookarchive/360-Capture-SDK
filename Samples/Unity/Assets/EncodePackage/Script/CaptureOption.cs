@@ -35,7 +35,7 @@ namespace FBCapture {
         [Header("Output Path")]
         public string outputPath;  // Path where created files will be saved
 
-        private bool currDoSurroundCapture;
+        private bool currDoSurroundCapture = true;
         private bool doSurroundCapture {
             set {
                 if (currDoSurroundCapture == value)
@@ -67,8 +67,13 @@ namespace FBCapture {
                 }
 
                 currLiveStreaming = value;
-                surroundCapture.isLiveStreaming = currDoSurroundCapture && currLiveStreaming;
-                nonSurroundCapture.enabled = !currDoSurroundCapture && currLiveStreaming;
+                if (currDoSurroundCapture) {
+                    surroundCapture.isLiveStreaming = currLiveStreaming;
+                }
+                else {
+                    nonSurroundCapture.isLiveStreaming = currLiveStreaming;
+                }
+                
                 liveStreamServerUrl = streamKeyOption;
                 Debug.LogFormat("LiveStreaming {0}", currLiveStreaming ? "enabled" : "disabled");
             }
@@ -112,6 +117,9 @@ namespace FBCapture {
 
             surroundCapture = GetComponent<SurroundCapture>();
             nonSurroundCapture = GetComponent<NonSurroundCapture>();
+            
+            // surround capture is default
+            surroundCapture.enabled = true;
 
             doSurroundCapture = doSurroundCaptureOption;
             liveStreaming = liveStreamingOption;
@@ -128,7 +136,7 @@ namespace FBCapture {
             if (Input.GetKeyDown(screenShotKey) && currDoSurroundCapture) {
                 surroundCapture.TakeScreenshot(screenShotWidth, screenShotHeight, ScreenShotName(screenShotWidth, screenShotHeight));
             } else if (Input.GetKeyDown(encodingStartShotKey) && currDoSurroundCapture) {
-                surroundCapture.StartEncodingVideo(videoWidth, videoHeight, fps, bitrate, MovieName(videoWidth, videoHeight));
+                surroundCapture.StartEncodingVideo(videoWidth, videoHeight, MovieName(videoWidth, videoHeight));
             } else if (Input.GetKeyDown(encodingStopShotKey) && currDoSurroundCapture) {
                 surroundCapture.StopEncodingVideo();
             }
@@ -137,7 +145,7 @@ namespace FBCapture {
             if (Input.GetKeyDown(screenShotKey) && !currDoSurroundCapture) {
                 nonSurroundCapture.TakeScreenshot(screenShotWidth, screenShotHeight, ScreenShotName(screenShotWidth, screenShotHeight));
             } else if (Input.GetKeyDown(encodingStartShotKey) && !currDoSurroundCapture) {
-                nonSurroundCapture.StartEncodingVideo(videoWidth, videoHeight, fps, bitrate, MovieName(videoWidth, videoHeight));
+                nonSurroundCapture.StartEncodingVideo(videoWidth, videoHeight, MovieName(videoWidth, videoHeight));
             } else if (Input.GetKeyDown(encodingStopShotKey) && !currDoSurroundCapture) {
                 nonSurroundCapture.StopEncodingVideo();
             }
