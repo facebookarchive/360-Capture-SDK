@@ -297,7 +297,8 @@ namespace FBCapture {
             FBCAPTURE_STATUS status;
             while (!terminateThread) {
                 if (needAudioEncoding) {
-                    status = audioEncoding(useVRAudioResources: true, silenceMode: pauseAudioCapture, vrDevice: attachedHMD, useMicIMMDeviceId: null);
+                    // useVRAudioResources should be true in Rift or Vive
+                    status = audioEncoding(useVRAudioResources: false, silenceMode: pauseAudioCapture, vrDevice: attachedHMD, useMicIMMDeviceId: null);
                     if (status != FBCAPTURE_STATUS.OK) {
                         Debug.Log("Failed on audio encoding. Please check FBCaptureSDK.log file for more information. [Error Type: " + status + "]");
                         needAudioEncoding = false;
@@ -313,11 +314,9 @@ namespace FBCapture {
             if (width == 0 || height == 0) {
                 Debug.Log("The width and height shouldn't be zero");
                 return false;
-            }
-            else if (width == lastWidth && height == lastHeight) {
+            } else if (width == lastWidth && height == lastHeight) {
                 return true;
-            }
-            else {
+            } else {
                 lastWidth = width;
                 lastHeight = height;
             }
@@ -483,6 +482,8 @@ namespace FBCapture {
                     return;
                 }
             }
+
+            SetOutputSize(width, height);
 
             if (muxingThread == null) {
                 muxingThread = new Thread(MuxingThread);

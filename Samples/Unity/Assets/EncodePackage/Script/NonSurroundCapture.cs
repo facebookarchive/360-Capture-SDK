@@ -264,7 +264,8 @@ namespace FBCapture {
             FBCAPTURE_STATUS status;
             while (!terminateThread) {
                 if (needAudioEncoding) {
-                    status = audioEncoding(useVRAudioResources: true, silenceMode: pauseAudioCapture, vrDevice: attachedHMD, useMicIMMDeviceId: null);
+                    // useVRAudioResources should be true in Rift or Vive.
+                    status = audioEncoding(useVRAudioResources: false, silenceMode: pauseAudioCapture, vrDevice: attachedHMD, useMicIMMDeviceId: null);
                     if (status != FBCAPTURE_STATUS.OK) {
                         Debug.Log("Failed on audio encoding. Please check FBCaptureSDK.log file for more information. [Error Type: " + status + "]");
                         needAudioEncoding = false;
@@ -377,6 +378,8 @@ namespace FBCapture {
                 }
             }
 
+            SetOutputSize(width, height);
+
             if (muxingThread == null) {
                 muxingThread = new Thread(MuxingThread);
                 muxingThread.Start();
@@ -434,18 +437,24 @@ namespace FBCapture {
 
         void OnRenderImage(RenderTexture src, RenderTexture dest) {
             Graphics.Blit(renderTexture, outputTexture, flippingTextureMaterial);
+
         }
 
         bool SetOutputSize(int width, int height) {
             if (width == 0 || height == 0) {
                 Debug.Log("The width and height shouldn't be zero");
                 return false;
+            } else if (width == lastWidth && height == lastHeight) {
+                return true;
+            } else {
+                lastWidth = width;
+                lastHeight = height;
             }
 
-            renderTexture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            renderTexture = new RenderTexture(lastWidth, lastHeight, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
             sceneCamera.targetTexture = renderTexture;
 
-            outputTexture = new RenderTexture(width, height, 0);
+            outputTexture = new RenderTexture(lastWidth, lastHeight, 0);
             outputTexture.hideFlags = HideFlags.HideAndDontSave;
 
             return true;

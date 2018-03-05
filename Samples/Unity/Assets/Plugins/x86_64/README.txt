@@ -1,0 +1,1 @@
+Please download FBCapture.dll on "https://github.com/facebook/360-Capture-SDK/releases" (Mar 5, 2018)
