@@ -159,7 +159,7 @@ namespace FBCapture {
         }
 
         string MovieName(int width, int height) {
-            return string.Format("{0}/movie_{1}x{2}_{3}.h264",
+            return string.Format("{0}/movie_{1}x{2}_{3}.mp4",
                                 outputPath,
                                 width, height,
                                 DateTime.Now.ToString("yyyy-MM-dd hh_mm_ss"));
