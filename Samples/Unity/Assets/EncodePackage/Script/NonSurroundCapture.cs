@@ -147,8 +147,8 @@ namespace FBCapture {
         public Camera sceneCamera;
 
         // It sets video FPS
-        int videoFPS = 30;
-        float frameDuration = 1f / 30f;
+        int videoFPS;
+        private float frameDuration;
         float fpsTimer = 0f;
 
         // Encoding bitrate
@@ -360,7 +360,7 @@ namespace FBCapture {
             }
         }
 
-        public void StartEncodingVideo(int width, int height, string moviePathName = "") {
+        public void StartEncodingVideo(int width, int height, int fps, string moviePathName = "") {
             if (!string.IsNullOrEmpty(moviePathName)) {
                 videoFullPath = moviePathName;
             }
@@ -398,6 +398,8 @@ namespace FBCapture {
             requestedFinalStream = false;
             needAudioEncoding = true;
 
+            videoFPS = fps;
+            frameDuration = 1.0f / videoFPS;
             flushTimer = 0.0f;
             fpsTimer = 0.0f;
             flushCycle = initialFlushCycle;
