@@ -1,135 +1,230 @@
-# 360-Capture-SDK
-This is a developer focused SDK that allows game and virtual reality developers to be able to easily and quickly integrate 360 photo/video capture capability into their applications.
+# FBCAPTURE SDK 2.0 DOCUMENTATION
 
-# Core Features Supported
-This SDK enables you to capture, record, and encode 360 photos and videos with the relevant metadata necessary for detection. 
+## Release Note
 
-For photo capture, it will save the captured 360 photo JPEG to a folder on disk with relevant photosphere metadata added.
-For video capture, it will save the captured 360 video MP4 to a folder on disk (metadata coming soon, for now you can inject the metadata manually).
+* RGB-D Capture Support
+    * We're starting to support RGB-D capture for euqirectangular videos. You will be able to see recorded RGB-D video with RGB-D video player. 
+* Metadata Injection for recorded 360 video. 
+    * Another file named “xxxx_injected.mp4” will be generated for metadata injected video file. You can upload 360 video to FB or Youtube without any additional work.
+* More simple APIs and integration process
+    * All threads for encoding and screenshot are now managed in FBCapture SDK
+    * Single APIs will handle start and stop encoding
+* Webcam Capture Support with overlay
+    * You're able to capture webcam and overlay it on the captured video
+* Windows 7 Support (SP1 or greater)
+* 32 Bit Support
+* Bug fixes, performance improvement and memory optimizations
+    * Improved many parts of performance including async texture encoding, memory, and stability on live and vod we got on FBCapture SDK 1.0
 
-We record the default audio output from speakers and mux it with the 360 video captured on screen to create an output mp4.
+## Compatibility
 
-# Game Engine Compatibility
-Our SDK solution can be integrated into 
-1. Unity
-2. Unreal
-3. Custom native engines
+ 1. Hardware AND Software Compatibility
 
-# Hardware Compatibility
-We support both AMD and NVIDIA GPU hardware in terms of compatibility with this SDK. For details, please see the below detailed specs.
-
-## Detailed Hardware Compatibility
-* **NVidia**
-    * Operating System (x64 only): Windows 8, 10, Server 2008 R2, Server 2012
-    * GPU: NVIDIA Quadro, Tesla, GRID or GeForce products with Kepler, Maxwell and Pascal generation GPUs. 
+* NVidia
+    * GPU: NVIDIA Quadro, Tesla, GRID or GeForce products with Kepler, Maxwell and Pascal generation GPUs.
     * NVidia Windows display driver: 375.95 or newer
-
-
-* **AMD**
-    * Operating System (x64 only): Windows 8, 10
+* AMD
     * GPU: AMD GPUs supporting following driver
     * AMD Windows display driver: AMD Radeon Software Crimson 17.1.1 or later
+* OS
+    *  Windows 7 SP1 or Greater
 
-# Supported Resolutions for Capture Output
-We've tested and found our SDK can capture 4K 360 videos in realtime. You can adjust the resolution capture settings for photos and videos to test how it works with your title.
+## Download
 
-# How to integrate
+1. Unity Full Sample Project Download: 
+https://github.com/facebook/360-Capture-SDK/tree/master/Samples/Unity
 
-## Unity
-We've provided a sample integration into Unity showing how you may use the SDK to capture and record 360 photos/videos with a simple scene.
+2. FBCapture SDK 2.0 Unity Package Download: 
+https://github.com/facebook/360-Capture-SDK/blob/master/FBCaptureSDK.unitypackage
 
-Once you open the Unity sample project in Unity, you will be able to find “EncodePackage” and it includes everything we need for 360 and rectilinear capturing and encoding. To set up encode environment, you need to place the EncoderObject prefab in the scene where you want to use it as a spectator.
-Then you can select option in ‘CaptureOption.cs’ to determine whether to capture in 360 or as a standard rectilinear.
+## FBCAPTURE SDK 2.0 Unity Integration Guide
 
-The APIs in Unity Script layer are pretty simple regardless of what GPU you are using.
+1. **Integration Guide**
+   1) DLL copy
+       1) Download attached DLLs in this page and copy them into plugin folders in the Sample Project
+   2) Unity package import
+       1) Import FBCapture SDK Unity package into your Unity project
+       2)  Drag and drop FBCapture prefab into your scene
+       3) That's it. Now you're ready to go for video and image capture 
 
-The plugin provides two functions in Unity script layer for video encoding and the functions will call the proper codec APIs in backend depending on GPUs. All functions needed for encoding are managed by the backend. 
+2. **Folder Structure**
+    1. Scripts
+         - DisplayDepth.cs: Rendering depth texture with the ConvertDepth material 
+         - FBCaptureSDK:* Main script calling FBCAPTURE SDK’s APIs 
+     2.  Shaders
+         - ConvertDepth: Reading from Unity Depth texture and converting to RGB-D inverse depth
+         - CubemapDisplay: Generating cubemap texture
+         - CubemapToEquirect:* Generating equirect texture from cubemap texture
+      3. Prefab
+          - FBCapture: Capturing video and screenshot for 360, non-360 and RGB-D.
+ It’s everything you need to put in the scene for capturing video and screenshot. 
 
-Basically, the video is encoded with a RenderTexture and we need to attach the RenderTexture as a target texture on the camera of child object in the EncoderObject prefab. We can place the plugin position where we want to use as spectator. If we want to change video resolution, it aligns with “External Width” and “External Height” values in LiveSurroundCapture.cs and NonSurroundCapture.cs.
+3. **FBCapture Prefab and Interface on Unity Inspector**
+FBCapture prefab handles all encoding and screenshot sessions with “FBCapture.dll”. 
 
-For Audio, we need to record consistently while game is running and we must call the audioEncoding function every frame to keep writing audio data into buffer.
-```
-private static extern void audioEncoding();
-```
-The startEncoding function is for passing RenderTexture to native encoder layer for encoding video. If we want to encode video with 30 fps, we need to set calling it by 30 fps as implemented in “SurroundCapture.cs” and “NonSurroundCapture.cs”.
-```
-private static extern void startEncoding(IntPtr texture, String path, bool isLive, bool needsFlipping);
-```
-The stopEncoding function is for flushing all inputs which were stacked in input buffers and it needs to be called once when we want to stop encoding
-```
-private static extern void stopEncoding();
-```
-The muxingData function is for muxing audio and video into mp4 and final video file is generated with the function. It should be called after stopEncoding function.
-```
-private static extern void muxingData();
-```
-The saveScreenShot is for taking screenshot. If you want to take a screenshot, just call this function anytime.
-```
-private static extern void saveScreenshot(IntPtr texture, string path, bool needsFlipping);
-```
-## Native Engine Integration
-First we need to pass dx11 device pointer to dll and it will be used for setting the relevant encoding SDK for your hardware (AMD vs NVIDIA).
-```
-/**
-	* Allocate ID3D11Device got from application to pass video encoder apis
-	* - It needs to be called before startEncoding() as one part of initialization
-	*/
-	DllExport void SetGraphicsDevice(ID3D11Device* device);
-```
-As mentioned in above Unity part, we want to call AudioEncoding() function every frame by the same token.
-```
-/**
-	* Capture audio
-	* - It needs to be called every frame
-	* - It will generate wav file
-	*/
-	DllExport void AudioEncoding();
-```
-This function is for capturing screen and we need to pass texture pointer(void pointer) based on 30 fps as we want to get 30 fps movie. The texture needs to be the content you want to encode as a video, so it should already be in the format of a 360 video (equirectangular or cubemap). See details below for texture formats and how to convert them.
-```
-/**
-	* Capture Screen and encode to h264
-	* - It needs to be regularly called based on 30 fps
-	*  ex)
-	*      float fps = 1f / 30.0f;
-	*      fpsTimer += Time.deltaTime;
-	*      if(fpsTimer >= fps){ fpsTimer = 0.0f;  startEncoding(...); }
-	*
-	* @param texturePtr       ID3D11Texture2D to encode h264
-	* @param fullSavePath     video save folder path including file name
-	* @param isLive			  Select whether to be live or VOD. (It should be false now since live isn't support yet)
-	* @param needFlipping	  true if you want to flip pixels vertically
-	*/
-	DllExport void StartEncoding(const void* texturePtr, const TCHAR* fullSavePath, bool isLive, bool needFlipping);
-```
-It will stop encoding and create mp4 file by muxing h264 and aac file. We need to call this function when we want to stop encoding.
-```
-/**
-	* Flushing all input video and audio datas and mux them into mp4
-	* - It needs to be called when you want to finish encoding
-	* - It will generate mp4 file
-	*/
-	DllExport void StopEncoding();
-```
-It will take screenshot and you should set file format as JPEG for the fullSavePath parameter. Note that metadata for 360 image recognition in FB feed is injected by default. So you can upload the image in FB as 360 image.
-```
-/**
-	* Take Screenshot
-	* - File format should be JPEG
-	* @param texturePtr       ID3D11Texture2D that you want to capture and encode to jpeg
-	* @param fullSavePath     image save folder path including file name
-	* @param needFlipping	  true if you want to flip pixels vertically
-	*/
-	DllExport void SaveScreenShot(const void* texturePtr, const TCHAR* fullSavePath, bool needFlipping);
-};
-```
-# Building FBCapture.dll source
-Please refer to: https://github.com/facebook/360-Capture-SDK/releases for instructions on steps one needs to follow for building the dll on their own.
+      * *360 Capture Camera*
+         * The cameras will be used for generating cubemap, equirect and depth textures for 360 capture
+      * *Capture Options*
+      * *Capture Mode:* You're able to select capture mode for 360 capture and non 360 capture
+      * *Capture Texture Format*: You're able to select texture format for RGB and RGB-D captures
+      * *Projection Type*: You're able to select projection type for 360 (EQUIRECT, CUBEMAP) capture
+      * *Video Capture Type*: You're able to select video capture type for VOD and Live streaming
+      * *Capture Hotkeys*
+         * Hotkeys to start or stop video encoding and screenshot
+      * *Live Video Settings*
+        * Live Video Preset
+           * *CUSTOM*: Custom resolution and bit rate
+           * *720P*: 1280 x 720, 2 megabit per second
+           * *1080P*: 1920 x 1080, 4 megabit per second
+           * *4K*: 4096 x 2048, 10 megabit per second
+        * *Live Video Width*: Set video resolution for width
+        * *Live Video Height*: Set video resolution for height
+        * *Live Video Frame Rate*: Set live video FPS
+        * *Live Video Bit Rate*: Set live video bit rate
+        * *Live Stream Url: Set live stream key for streaming server*
+     * *VOD Video Settings*
+        * Vod Video Preset
+           * *CUSTOM*: Custom resolution and bit rate
+           * *720P*: 1280 x 720, 2 megabit per second
+           * *1080P*: 1920 x 1080, 4 megabit per second
+          * *4K*: 4096 x 2048, 10 megabit per second
+       * VOD *Video Width*: Set video resolution for width
+       * VOD *Video Height*: Set video resolution for height
+       * VOD *Video Frame Rate*: Set vod video FPS
+       * VOD *Video Bit Rate*: Set vod video bit rate
+       * *Full Vod Save Path*: Set video save path for recorded video including file name (file format should be mp4 or h264)
+   * *Screenshot Settings*
+      * Screenshot Preset
+          * *CUSTOM*: Custom resolution
+          * *720P*: 1280 x 720
+          * *1080P*: 1920 x 1080
+          * *4K*: 4096 x 2048
+     * *Screenshot Width*: Set screenshot resolution for width
+     * *Screenshot Height*: Set screenshot resolution for height
+   * Preview Video Settings
+       * Preview Video Preset
+           * *CUSTOM*: Custom resolution and bit rate
+           * *720P*: 1280 x 720, 2 megabit per second
+           * *1080P*: 1920 x 1080, 4 megabit per second
+           * *4K*: 4096 x 2048, 10 megabit per second
+       * *Preview Video Width*: Set preview video resolution for width 
+       * *Preview Video Height*: Set preview video resolution for height
+       * *Preview Video Frame Rate*: Set preview video FPS
+       * *Preview Video Bit Rate*: Set preview video bit rate
+       * TODO: The function is implemented in FBCapture SDK, but the Unity sample doesn’t include this feature. We will update this feature in Unity sample later. 
+   * Shader Settings
+       * The shaders will generate cubemap, equirect textures with Surround Capture Cameras. 
 
-# Join the 360 Capture SDK community
 
-Please use our issues page to let us know of any problems or feedback. If you are working on a project using the 360 Capture SDK, please reach out to cg439/cpgupta@fb.com for potential opportunities to feature your work as created by the SDK.
 
-# License
+**4. FBCapture SDK Calling Conventions (Sample Unity C# Integration Code)**
 
-360 Capture SDK is BSD-licensed. We also provide an additional patent grant.
+   **1. Set up Session** 
+APIs needed to be called once at start encoding
+
+  (1) Check capabilities
+
+private static extern FBCAPTURE_STATUS fbc_getCaptureCapability();
+
+It will check hardware and software capabilities. Currently it checks windows version(Win 7 SP1 or greater), Graphics driver version(Nvidia: 375.95 or newer, AMD: Radeon Software Crimson 17.1.1 or later) and Graphics manufacturer(AMD, NVIDIA). If your specs doesn't meet SDK's minimum specs, it will return failure reason and won't start encoding. 
+
+ (2) Set configurations depending on capture types
+
+// Live configurations
+private static extern FBCAPTURE_STATUS fbc_setLiveCaptureSettings(
+                                                      int width,
+                                                      int height,
+                                                      int frameRate,
+                                                      int bitRate,
+                                                      float flushCycleStart,
+                                                      float flushCycleAfter,
+                                                      string streamUrl,
+                                                      bool is360,
+                                                      bool verticalFlip,
+                                                      bool horizontalFlip,
+                                                      PROJECTIONTYPE projectionType,
+                                                      STEREO_MODE stereoMode);
+
+// VOD configurations                                                                                                            
+private static extern FBCAPTURE_STATUS fbc_setVodCaptureSettings(
+                                                      int width,
+                                                      int height,
+                                                      int frameRate,
+                                                      int bitRate,
+                                                      string fullSavePath,
+                                                      bool is360,
+                                                      bool verticalFlip,
+                                                      bool horizontalFlip,
+                                                      PROJECTIONTYPE projectionType,
+                                                      STEREO_MODE stereoMode);
+
+// Screenshot Configurations
+private static extern FBCAPTURE_STATUS fbc_setScreenshotSettings(
+                                                      int width,
+                                                      int height,
+                                                      string fullSavePath,
+                                                      bool is360,
+                                                      bool verticalFlip,
+                                                      bool horizontalFlip);
+
+// Preview configurations
+private static extern FBCAPTURE_STATUS fbc_setPreviewCaptureSettings(
+                                                      int width,
+                                                      int height,
+                                                      int frameRate,
+                                                      bool is360,
+                                                      bool verticalFlip,
+                                                      bool horizontalFlip);
+
+                                                      
+
+It will configure encoding or screenshot properties.  In the Unity sample, we can easily set them on inspector of Unity editor. 
+
+  (3) Set VR audio device in used
+
+private static extern FBCAPTURE_STATUS 
+fbc_setMicAndAudioRenderDeviceByVRDeviceType(VRDeviceType vrDevice);
+
+It will set VR audio device that FBCapture SDK will capture for output(headphone) and input(microphone).
+
+   (4) Enable audio capture
+
+private static extern FBCAPTURE_STATUS 
+fbc_setAudioEnabledDuringCapture(bool enabled);
+
+It will enable audio capture during video capture. If you don't want to capture audio(input/output), then you need to pass 
+'false'. 
+
+   (5) Start capture depending on capture types
+
+// Start Live
+private static extern FBCAPTURE_STATUS fbc_startLiveCapture();
+
+// Start VOD
+private static extern FBCAPTURE_STATUS fbc_startVodCapture();
+
+// Start Screenshot
+private static extern FBCAPTURE_STATUS fbc_startScreenshot();
+
+// Start Preview 
+private static extern FBCAPTURE_STATUS fbc_startPreviewCapture();
+
+It will start encoding or screenshot session with creating resources and separate threads needed for session in dll. 
+
+   **2. Pass rendered Textures for encoding**
+   - API needed to be called every frame - Video
+private static extern FBCAPTURE_STATUS fbc_captureTexture(IntPtr texturePtr);
+
+It will pass rendered textures to FBCapture SDK and video will be generated based on the textures. 
+
+   - API needed to be called once after creating rendered texture - Screenshot 
+private static extern FBCAPTURE_STATUS fbc_saveScreenShot(IntPtr texturePtr);
+
+It will pass rendered texture to FBCapture SDK and screenshot will be generated based on the texture.
+
+**3. Stop Encoding**
+API needed to be called once at stop
+
+private static extern void fbc_stopCapture();
+
+It will flush input textures stacked on buffer and create video file with audio and video muxing. And then metadata for projection type, stereo mode and stitching software name will be injected for 360 VOD video, but only stitching software name's metadata will be injected for non 360 VOD video. At last, it will release all created resources and cleanup threads. 
