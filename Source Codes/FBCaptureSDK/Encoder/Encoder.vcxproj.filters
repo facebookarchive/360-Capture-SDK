@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\AMD\common\AMFFactory.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\AMFSTL.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamFactory.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamFile.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamMemory.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\Thread.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\TraceAdapter.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\Windows\ThreadWindows.cpp">
+      <Filter>Source\Video Encode SDK\AMD\public\common</Filter>
+    </ClCompile>
+    <ClCompile Include="EncoderMain.cpp" />
+    <ClCompile Include="..\NVidia\common\src\NvHWEncoder.cpp">
+      <Filter>Source\Video Encode SDK\NVIDIA</Filter>
+    </ClCompile>
+    <ClCompile Include="AMDEncoder.cpp">
+      <Filter>Source\Encoder\Video</Filter>
+    </ClCompile>
+    <ClCompile Include="NVEncoder.cpp">
+      <Filter>Source\Encoder\Video</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioBuffer.cpp">
+      <Filter>Source\Encoder\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioEncoder.cpp">
+      <Filter>Source\Encoder\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioCapture.cpp">
+      <Filter>Source\Encoder\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="FLVmuxer.cpp">
+      <Filter>Source\Muxer</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenGrab.cpp">
+      <Filter>Source\ScreenShot</Filter>
+    </ClCompile>
+    <ClCompile Include="MP4muxer.cpp">
+      <Filter>Source\Muxer</Filter>
+    </ClCompile>
+    <ClCompile Include="LibRTMP.cpp">
+      <Filter>Source\Live</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="FBCaptureSystem.cpp" />
+    <ClCompile Include="GraphicsDeviceCaptureD3D11.cpp" />
+    <ClCompile Include="IGraphicsDeviceCapture.cpp" />
+    <ClCompile Include="TextureRender.cpp" />
+    <ClCompile Include="CameraDeviceManager.cpp">
+      <Filter>Source\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraDevices.cpp">
+      <Filter>Source\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraReader.cpp">
+      <Filter>Source\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="MicDevices.cpp">
+      <Filter>Source\Microphone</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common.h">
+      <Filter>Headers\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Headers\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedCOMPtr.h">
+      <Filter>Headers\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioBuffer.h">
+      <Filter>Headers\Encoder\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioCapture.h">
+      <Filter>Headers\Encoder\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioEncoder.h">
+      <Filter>Headers\Encoder\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AMDEncoder.h">
+      <Filter>Headers\Encoder\Video</Filter>
+    </ClInclude>
+    <ClInclude Include="NVEncoder.h">
+      <Filter>Headers\Encoder\Video</Filter>
+    </ClInclude>
+    <ClInclude Include="LibRTMP.h">
+      <Filter>Headers\Live</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenGrab.h">
+      <Filter>Headers\ScreenShot</Filter>
+    </ClInclude>
+    <ClInclude Include="FLVmuxer.h">
+      <Filter>Headers\Muxer</Filter>
+    </ClInclude>
+    <ClInclude Include="MP4muxer.h">
+      <Filter>Headers\Muxer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\AMFSTL.h">
+      <Filter>Headers\Video Encode SDK\AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\AMFFactory.h">
+      <Filter>Headers\Video Encode SDK\AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStreamFile.h">
+      <Filter>Headers\Video Encode SDK\AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStreamMemory.h">
+      <Filter>Headers\Video Encode SDK\AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\Thread.h">
+      <Filter>Headers\Video Encode SDK\AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\TraceAdapter.h">
+      <Filter>Headers\Video Encode SDK\AMD\public\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NVidia\common\inc\NvHWEncoder.h">
+      <Filter>Headers\Video Encode SDK\NVIDIA</Filter>
+    </ClInclude>
+    <ClInclude Include="EncoderMain.h" />
+    <ClInclude Include="FBCaptureSystem.h" />
+    <ClInclude Include="GraphicsDeviceCaptureD3D11.h" />
+    <ClInclude Include="IGraphicsDeviceCapture.h" />
+    <ClInclude Include="TextureRender.h" />
+    <ClInclude Include="ScopedCOMem.h">
+      <Filter>Headers\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraDeviceManager.h">
+      <Filter>Headers\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraDevices.h">
+      <Filter>Headers\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraReader.h">
+      <Filter>Headers\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="MicDevices.h">
+      <Filter>Headers\Microphone</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenPixelShader.h">
+      <Filter>Headers\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenVertexShader.h">
+      <Filter>Headers\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenVertexShaderFlipped.h">
+      <Filter>Headers\Shaders</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{6197134c-6525-4830-9bc6-2bf854df5ed7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{d2ad2da5-4a8f-48c2-ad94-dc12747bf677}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Muxer">
+      <UniqueIdentifier>{95a11a73-a97b-4792-bf2f-7919e308f5aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Live">
+      <UniqueIdentifier>{621ab6e1-d83e-4613-951e-5879a6275fdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Encoder">
+      <UniqueIdentifier>{4fb1dea2-b90e-442c-9fb4-38125c93514b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ScreenShot">
+      <UniqueIdentifier>{42237c25-439c-4b78-b20d-3265ee0d16e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Encoder">
+      <UniqueIdentifier>{9e6c49a5-90b4-4c0f-9a75-ecf5aa7e59cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Encoder\Audio">
+      <UniqueIdentifier>{af09b9fb-5236-480c-8821-640192cc7b63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Encoder\Video">
+      <UniqueIdentifier>{caec9e35-3707-4b2b-80ce-885f079ed6a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Encoder\Audio">
+      <UniqueIdentifier>{8ff80007-3ae1-4bde-b4b4-5690e20fac0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Encoder\Video">
+      <UniqueIdentifier>{4569ab1b-cebf-4f64-8134-28b21a4ee1c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Live">
+      <UniqueIdentifier>{2ae0764b-371f-46e4-983b-32061e76a0e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\ScreenShot">
+      <UniqueIdentifier>{9a7d0094-0a74-4513-af4d-19a1771eb71a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Common">
+      <UniqueIdentifier>{9b5f8d03-43e7-4281-b5a4-0065f95c1e10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Common">
+      <UniqueIdentifier>{e7f05760-d5c7-4d19-9010-bc46061bae30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Muxer">
+      <UniqueIdentifier>{d9ec184c-1d3f-49b0-b4fc-f0b345bb1a48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Video Encode SDK">
+      <UniqueIdentifier>{b500b6b0-0d29-425e-ab83-b22ab7d65b11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Video Encode SDK\NVIDIA">
+      <UniqueIdentifier>{2dd09f78-05fa-49e3-a86f-20381b0d9f7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Video Encode SDK\AMD">
+      <UniqueIdentifier>{d94e710b-a7d4-476f-8e36-69a82d21443a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Video Encode SDK\AMD\public">
+      <UniqueIdentifier>{2311bd51-14cb-4edd-94b0-3ae81eda2b66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Video Encode SDK\AMD\public\common">
+      <UniqueIdentifier>{4b6b6b2f-d63c-4eaf-a893-8738b2e9c9dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Video Encode SDK">
+      <UniqueIdentifier>{ce4b1980-8f82-47bd-b9d6-5e6305e190fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Video Encode SDK\AMD">
+      <UniqueIdentifier>{87978fd3-7ea4-44c1-abda-51d518d3dc2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Video Encode SDK\AMD\public">
+      <UniqueIdentifier>{e2a66373-b3b4-4ce5-bcbf-d4962145bd72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Video Encode SDK\AMD\public\common">
+      <UniqueIdentifier>{97817756-a0f2-400c-a9c5-50b4b49bb97a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Video Encode SDK\NVIDIA">
+      <UniqueIdentifier>{7d4aba19-cfbc-4806-abed-5cb8b0f8a63a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Camera">
+      <UniqueIdentifier>{e9a1c38d-e8ef-4129-919b-c3466a0bb10e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Microphone">
+      <UniqueIdentifier>{f9cfaed4-1d6f-47e9-b338-994897412c23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Camera">
+      <UniqueIdentifier>{7c4fe243-8474-447d-97db-9cbfa6f0104c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Microphone">
+      <UniqueIdentifier>{87fed050-b8e4-456a-95b7-14eab2ecdae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shaders">
+      <UniqueIdentifier>{133d97cc-7121-4aeb-80e1-8ceca0e0e107}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="ScreenPixelShader.hlsl" />
+    <FxCompile Include="ScreenVertexShader.hlsl" />
+  </ItemGroup>
+</Project>
