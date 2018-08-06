@@ -34,13 +34,10 @@
 1. Unity Full Sample Project Download: 
 https://github.com/facebook/360-Capture-SDK/tree/master/Samples/Unity
 
-2. FBCapture SDK 2.0 Unity Package Download: 
-https://github.com/facebook/360-Capture-SDK/blob/master/FBCaptureSDK.unitypackage
+2. FBCapture SDK 2.2 Full Source Code:
+https://github.com/facebook/360-Capture-SDK/releases/tag/v2.20
 
-3. FBCapture SDK 2.0 Full Source Code:
-https://github.com/facebook/360-Capture-SDK/releases/tag/v2.01
-
-## FBCAPTURE SDK 2.0 Unity Integration Guide
+## FBCAPTURE SDK 2.2 Unity Integration Guide
 
 1. **Integration Guide**
    1) DLL copy
