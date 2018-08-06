@@ -125,7 +125,12 @@ namespace FBCapture {
 			FBCAPTURE_STATUS encodeMain(const void* texturePtr, const wstring& fullSavePath, int bitrate, int fps, bool needFlipping);  // Main loop function for encoding      
 			FBCAPTURE_STATUS saveScreenShot(const void* texturePtr, const wstring& fullSavePath, bool is360);  // Take screenshot																																																								
 			FBCAPTURE_STATUS flushInputTextures(); // Flush queued textures in buffers to create video
-			FBCAPTURE_STATUS initNVEncodingSession();			
+			FBCAPTURE_STATUS initNVEncodingSession();
+			FBCAPTURE_STATUS releaseEncodeResources();  // Release all resources allocated for encoding
+			// Dummy texture encoding. We need to encode dummy texture for one frame so that we can clearly destroy encoder after capability check
+			FBCAPTURE_STATUS dummyTextureEncoding();
+
+
 
 		protected:
 			// To access the NVidia HW Encoder interfaces
@@ -139,9 +144,9 @@ namespace FBCapture {
 
 			// DX 11 interfaces      
 			ID3D11Texture2D* fromTexturePtr_ = nullptr;
-			ScopedCOMPtr<ID3D11DeviceContext> context_ = nullptr;			
-			ScopedCOMPtr<ID3D11Texture2D> encodingTexure_ = nullptr;
-			ScopedCOMPtr<ID3D11Device> device_ = nullptr;
+			ID3D11DeviceContext* context_ = nullptr;			
+			ID3D11Device* device_ = nullptr;
+			ScopedCOMPtr<ID3D11Texture2D> encodingTexure_ = nullptr;			
 			D3D11_TEXTURE2D_DESC globalTexDesc_ = {};
 			D3D11_BOX dirtyRegion_ = {};
 
@@ -175,16 +180,13 @@ namespace FBCapture {
 			// Set texture dirty region
 			// It's called only once in entire app life time
 			void setTextureDirtyRegion();
-
-			// Release all resources allocated for encoding
-			NVENCSTATUS releaseEncodeResources();
-
+			
 			// Release allocated buffers in AllocateIOBuffers after flushing or terminating process
 			void releaseIOBuffers();
 
 			// Release resources related to DX11
 			void releaseD3D11Resources();
-
+		
 			// Gets the feature level of the hardware device
 			// https://msdn.microsoft.com/en-us/library/windows/desktop/ff476329(v=vs.85).aspx
 			virtual bool getUsesReverseZ() { return (int)device_->GetFeatureLevel() >= (int)D3D_FEATURE_LEVEL_10_0; }

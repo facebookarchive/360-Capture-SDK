@@ -10,6 +10,11 @@ Copyright	:
 ****************************************************************************************************************/
 
 #pragma once
+
+#ifdef _WIN32
+#include <Shlobj.h>
+#endif
+
 #include <comdef.h>
 #include <stdexcept>
 #include <iostream>
@@ -50,12 +55,10 @@ namespace FBCapture {
   namespace Common {
 
     class EncoderLog {
-    private:
-      EncoderLog();
-      virtual ~EncoderLog();
-      EncoderLog(const EncoderLog&);
 
     public:
+      EncoderLog();
+      virtual ~EncoderLog();
       static const std::string kLog;
       static const std::string kError;
 
@@ -63,11 +66,11 @@ namespace FBCapture {
 
       void log(const std::string& log, const std::string& logType);
       void log(const std::string& log, const std::string& var, const std::string& logType);
-      void release();
 
     private:
-      static EncoderLog* kInstance;
-      std::ofstream output_;
+      //static EncoderLog* kInstance;
+      static std::unique_ptr<EncoderLog> kInstance;
+      std::ofstream output_ = {};
 
       void logWriter(const std::string& log, const std::string& logType);
       void logWriter(const std::string& log, const std::string& var, const std::string& inLogLevel);

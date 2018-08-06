@@ -81,6 +81,7 @@ namespace FBCapture {
       RTMP* rtmp_;
       RTMPPacket* packet_;
       bool initializedRTMPSession_;
+      bool initializedSocket_;
     };
   }
 }

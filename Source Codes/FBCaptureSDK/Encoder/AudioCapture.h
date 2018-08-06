@@ -86,6 +86,7 @@ namespace FBCapture {
 
       bool useMicrophone_;
       bool useVRAudioResources_;
+      std::chrono::time_point<std::chrono::steady_clock> lastAudioCapture_;
     };
   }
 }

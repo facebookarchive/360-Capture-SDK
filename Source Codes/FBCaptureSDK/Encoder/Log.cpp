@@ -9,36 +9,29 @@ Copyright	:
 
 ****************************************************************************************************************/
 
-#ifdef _WIN32
-#include <Shlobj.h>
-#endif
-
 #include "Log.h"
+#include <atlstr.h>
 
 namespace FBCapture {
   namespace Common {
 
     const string EncoderLog::kLog = "[INFO]";
     const string EncoderLog::kError = "[ERROR]";
-    EncoderLog* EncoderLog::kInstance = nullptr;
+    std::unique_ptr<EncoderLog> EncoderLog::kInstance = {};
 		
     EncoderLog& EncoderLog::instance() {
-      if (kInstance == nullptr)
-        kInstance = new EncoderLog();
+      if (kInstance == nullptr) {
+        kInstance = std::make_unique<EncoderLog>();
+      }
       return *kInstance;
-    }
-
-    void EncoderLog::release() {
-      delete EncoderLog::kInstance;
-      EncoderLog::kInstance = nullptr;
-    }
+    }   
 
     EncoderLog::~EncoderLog() {
-      output_.close();
+      output_.close(); 
     }
 
     EncoderLog::EncoderLog() {
-      // Save logfile to %LOCALAPPDATA%\FBCapture\FBCaptureSDK.txt
+      // Save logfile to %LOCALAPPDATA%\FBCapture\FBCaptureSDK_processname_timestamp.txt
       PWSTR localAppPath = nullptr;
       HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &localAppPath);
       if (FAILED(hr)) {
@@ -53,7 +46,29 @@ namespace FBCapture {
         throw runtime_error("Unable to create FBCapture subdirectory in LocalAppData: " + std::to_string(errno));
       }
 
-      logFile += L"\\FBCaptureSDK.txt";
+      // Create unique log file name with timestamp and process name
+      TCHAR szFileName[MAX_PATH + 1] = {};
+      wstring processName = {};
+
+      if (GetModuleFileName(nullptr, szFileName, MAX_PATH + 1)) {
+        processName = PathFindFileNameW(szFileName);
+        wstring extention = L".exe";
+        wstring::size_type sizeType = processName.find(extention);
+
+        if (sizeType != wstring::npos) processName.erase(sizeType, extention.length());
+        logFile += L"\\FBCaptureSDK_" + processName;
+      } else {
+        logFile += L"\\FBCaptureSDK";
+      }
+
+      static wchar_t timestamp[100] = {};      
+      time_t now = time(0);
+
+      if (wcsftime(timestamp, sizeof(timestamp), L"%Y%m%d_%H%M%S", localtime(&now))) {
+        logFile = logFile + L"_" + timestamp + L".txt";
+      } else {
+        logFile += L".txt";
+      }
       output_.open(logFile.c_str(), ios_base::out);
       if (!output_.good()) {
         throw runtime_error("Initialization is failed");

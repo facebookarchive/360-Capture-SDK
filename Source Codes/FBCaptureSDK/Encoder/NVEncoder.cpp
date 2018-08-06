@@ -102,12 +102,10 @@ namespace FBCapture {
 		}
 
 		void NVEncoder::releaseD3D11Resources() {
-			encodingTexure_ = nullptr;
-			device_ = nullptr;
-			context_ = nullptr;
+			encodingTexure_ = nullptr;			
 		}
 
-		NVENCSTATUS NVEncoder::releaseEncodeResources() {
+		FBCAPTURE_STATUS NVEncoder::releaseEncodeResources() {	
 			NVENCSTATUS nvStatus = NV_ENC_SUCCESS;
 
 			releaseIOBuffers();
@@ -116,14 +114,18 @@ namespace FBCapture {
 				fclose(encodeConfig_.fOutput);
 			}
 
-			// Clean up current encode component
+			// Clean up current encode session
 			if (nvHWEncoder_->m_pEncodeAPI) {
 				nvStatus = nvHWEncoder_->NvEncDestroyEncoder();
 				delete nvHWEncoder_->m_pEncodeAPI;
 				nvHWEncoder_->m_pEncodeAPI = nullptr;
+				if (nvStatus != NV_ENC_SUCCESS) {
+					DEBUG_ERROR_VAR("Failed to release resources. [Error code] ", nvidiaStatus[nvStatus]);
+					return FBCAPTURE_STATUS_ENCODE_DESTROY_FAILED;
+				}				
 			}
 
-			return nvStatus;
+			return FBCAPTURE_STATUS_OK;
 		}
 
 		void NVEncoder::releaseIOBuffers() {
@@ -272,9 +274,56 @@ namespace FBCapture {
 			return nvStatus;
 		}
 
+		FBCAPTURE_STATUS NVEncoder::dummyTextureEncoding() {
+
+			D3D11_TEXTURE2D_DESC desc = {};
+			HRESULT hr = S_OK;
+			ScopedCOMPtr<ID3D11Texture2D> dummyTexture = nullptr;			
+			ZeroMemory(&desc, sizeof(desc));
+			desc.Width = 100;
+			desc.Height = 100;
+			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			desc.SampleDesc.Count = 1;
+			desc.ArraySize = 1;
+			desc.MipLevels = 1;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			hr = device_->CreateTexture2D(&desc, nullptr,
+																		 &dummyTexture);
+			if (FAILED(hr)) {
+				DEBUG_HRESULT_ERROR(
+					"Failed to create encoding Texture2D FBCaptureSystem. [Error code] ",
+					hr);
+				return FBCAPTURE_STATUS_SYSTEM_ENCODING_TEXTURE_CREATION_FAILED;
+			}
+
+			// Save dummy h264 to %LOCALAPPDATA%\FBCapture\dummy.h264
+			PWSTR localAppPath = nullptr;
+			hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &localAppPath);
+			if (FAILED(hr)) {
+				throw runtime_error("Unable to locate LocalAppData");
+			}
+			std::wstring dummyFile = localAppPath;
+			dummyFile += L"\\FBCapture\\dummy.h264";
+
+			FBCAPTURE_STATUS status; 
+			status = encodeMain(dummyTexture, dummyFile, 1000000, 30, false);
+			if (status != FBCAPTURE_STATUS_OK) {
+				DEBUG_LOG_VAR("Dummy encode session failed", to_string(status));
+				releaseEncodeResources();
+				_wremove(dummyFile.c_str());
+				return status;
+			}
+
+			status = flushInputTextures();
+			_wremove(dummyFile.c_str());
+
+			return status;
+		}
+
 		FBCAPTURE_STATUS NVEncoder::initNVEncodingSession() {
 			NVENCSTATUS nvStatus = NV_ENC_SUCCESS;
-			FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
+			FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;			
 
 			if (nvHWEncoder_ == nullptr) {
 				nvHWEncoder_ = new CNvHWEncoder;
@@ -291,7 +340,7 @@ namespace FBCapture {
 				return status;
 			} else if (nvStatus != NV_ENC_SUCCESS) {
 				DEBUG_ERROR_VAR("Failed on initializing encoder. [Error code]", nvidiaStatus[nvStatus]);
-				status = FBCAPTURE_STATUS_ENCODE_INIT_FAILED;
+				status = FBCAPTURE_STATUS_UNSUPPORTED_ENCODING_ENVIRONMENT;
 				return status;
 			}
 
@@ -338,15 +387,9 @@ namespace FBCapture {
 			}
 
 			// Initialize Encoder
-			if (!encodingInitiated_) {
-				status = initNVEncodingSession();
-				if (status != FBCAPTURE_STATUS_OK) {
-					DEBUG_ERROR("Failed to initialize nvidia encoding session");
-					return status;
-				}
-
-				// Set Encode Configs
-				status = setEncodeConfigures(fullSavePath, globalTexDesc_.Width, globalTexDesc_.Height, bitrate, fps);
+			if (!encodingInitiated_) {		
+	
+				status = setEncodeConfigures(fullSavePath, globalTexDesc_.Width, globalTexDesc_.Height, bitrate, fps);  // Set Encode Configs
 				if (status != FBCAPTURE_STATUS_OK) {
 					return status;
 				}
@@ -388,31 +431,26 @@ namespace FBCapture {
 
 		FBCAPTURE_STATUS NVEncoder::flushInputTextures() {
 			NVENCSTATUS nvStatus;
-
-			nvStatus = flushEncoder();
-			if (nvStatus != NV_ENC_SUCCESS) {
-				DEBUG_ERROR_VAR("Failed to flush inputs from buffer. [Error code] ", nvidiaStatus[nvStatus]);
-				return FBCAPTURE_STATUS_ENCODE_FLUSH_FAILED;
-			}
-
-			nvStatus = releaseEncodeResources();
-			if (nvStatus != NV_ENC_SUCCESS) {
-				DEBUG_ERROR_VAR("Failed to release resources. [Error code] ", nvidiaStatus[nvStatus]);
-				return FBCAPTURE_STATUS_ENCODE_FLUSH_FAILED;
-			}
+			FBCAPTURE_STATUS status;
 
 			encodingInitiated_ = false;
 
-			return FBCAPTURE_STATUS_OK;
+			nvStatus = flushEncoder();
+			if (nvStatus != NV_ENC_SUCCESS) {
+				DEBUG_ERROR_VAR("Failed to flush inputs from buffer. [Error code] ", nvidiaStatus[nvStatus]);					
+			}
+			status = releaseEncodeResources();
+
+			return nvStatus != NV_ENC_SUCCESS ? FBCAPTURE_STATUS_ENCODE_FLUSH_FAILED : status;
 		}
 
 		NVENCSTATUS NVEncoder::encodeFrame(uint32_t width, uint32_t height, NV_ENC_BUFFER_FORMAT inputformat) {
 			NVENCSTATUS nvStatus = NV_ENC_SUCCESS;
 
 			uint32_t lockedPitch = 0;
-			EncodeBuffer *pEncodeBuffer = NULL;
+			EncodeBuffer *pEncodeBuffer = nullptr;
 
-			int8_t* qpDeltaMapArray = NULL;
+			int8_t* qpDeltaMapArray = nullptr;
 			unsigned int qpDeltaMapArraySize = 0;
 
 			pEncodeBuffer = encodeBufferQueue_.getAvailable();
@@ -421,7 +459,7 @@ namespace FBCapture {
 				pEncodeBuffer = encodeBufferQueue_.getAvailable();
 			}
 
-			nvStatus = nvHWEncoder_->NvEncEncodeFrame(pEncodeBuffer, NULL, width, height, NV_ENC_PIC_STRUCT_FRAME, qpDeltaMapArray, qpDeltaMapArraySize);
+			nvStatus = nvHWEncoder_->NvEncEncodeFrame(pEncodeBuffer, nullptr, width, height, NV_ENC_PIC_STRUCT_FRAME, qpDeltaMapArray, qpDeltaMapArraySize);
 			if (nvStatus != NV_ENC_SUCCESS) {
 				DEBUG_ERROR_VAR("Failed on encoding frames. Error code:", nvidiaStatus[nvStatus]);
 				return nvStatus;

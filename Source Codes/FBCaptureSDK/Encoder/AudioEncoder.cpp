@@ -105,13 +105,20 @@ FBCAPTURE_STATUS AudioEncoder::continueAudioTranscoding(const string &srcFile,
   srcFile_ = stringTypeConversion.from_bytes(srcFile);
   dstFile_ = stringTypeConversion.from_bytes(dstFile);
 
-  HMMIO phFile = mmioOpen(
-      // some flags cause mmioOpen write to this buffer
-      // but not any that we're using
-      const_cast<LPWSTR>(dstFile_.c_str()), NULL,
-      MMIO_CREATE | MMIO_WRITE | MMIO_EXCLUSIVE);
-
-  if (NULL == phFile) {
+  auto cleanupHandler = [&](HMMIO__* ptr) {
+    mmioClose(ptr, 0);
+    remove(srcFile.c_str()); // Remove wav file after transcoding to aac
+  };
+  auto phFile = std::unique_ptr<HMMIO__, decltype(cleanupHandler)>
+    (
+      mmioOpen(
+        // some flags cause mmioOpen write to this buffer
+        // but not any that we're using
+        const_cast<LPWSTR>(dstFile_.c_str()), NULL,
+        MMIO_CREATE | MMIO_WRITE | MMIO_EXCLUSIVE),
+      cleanupHandler
+      );
+  if (!phFile) {
     DEBUG_ERROR("Failed to create transcoded audio file.");
     return FBCAPTURE_STATUS_OUTPUT_FILE_CREATION_FAILED;
   }
@@ -129,7 +136,7 @@ FBCAPTURE_STATUS AudioEncoder::continueAudioTranscoding(const string &srcFile,
     if (FAILED(hr)) {
       DEBUG_ERROR_VAR("Failed to create source reader. [Error code] ",
                       to_string(hr));
-      return FBCAPTURE_STATUS_MF_STREAM_SELECTION_FAILED;
+      return FBCAPTURE_STATUS_MF_SOURCE_READER_CREATION_FAILED;
     }
 
     hr = reader->SetCurrentMediaType(
@@ -230,18 +237,13 @@ FBCAPTURE_STATUS AudioEncoder::continueAudioTranscoding(const string &srcFile,
       }
 
       auto adtsHeader = getAdtsHeader(audioData.size(), channels, sampleRate);
-      mmioWrite(phFile, reinterpret_cast<PCCH>(&adtsHeader[0]),
+      mmioWrite(phFile.get(), reinterpret_cast<PCCH>(&adtsHeader[0]),
                 adtsHeader.size() * sizeof(uint8_t));
-      mmioWrite(phFile, reinterpret_cast<PCCH>(audioData.data()),
+      mmioWrite(phFile.get(), reinterpret_cast<PCCH>(audioData.data()),
                 audioData.size() * sizeof(BYTE));
       audioData.clear();
     }
   }
-
-  mmioClose(phFile, 0);
-  phFile = nullptr;
-
-  remove(srcFile.c_str()); // Remove wav file after transcoding to aac
 
   return FBCAPTURE_STATUS_OK;
 }
@@ -279,7 +281,7 @@ AudioEncoder::initializeAudioTranscoding(IMFSourceReader **reader) {
   if (FAILED(hr)) {
     DEBUG_ERROR_VAR("Failed to create source reader. [Error code] ",
                     to_string(hr));
-    return FBCAPTURE_STATUS_MF_STREAM_SELECTION_FAILED;
+    return FBCAPTURE_STATUS_MF_SOURCE_READER_CREATION_FAILED;
   }
 
   hr = (*reader)->SetStreamSelection(
