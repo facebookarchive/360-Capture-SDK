@@ -18,12 +18,10 @@ using namespace FBCapture::Common;
 namespace FBCapture {
   namespace Common {
 
-
     // Capture SDK Version Update String
-    const string sdkVersion = "2.0";
+    const string sdkVersion = "2.20";
 
-    EncoderMain::EncoderMain()
-    {
+    EncoderMain::EncoderMain() {
       DEBUG_LOG_VAR("Capture SDK Version: ", sdkVersion);
     }
 
@@ -62,8 +60,6 @@ namespace FBCapture {
         delete rtmp;
         rtmp = nullptr;
       }
-
-      RELEASE_LOG();
     }
 
     vector<wstring> EncoderMain::splitString(wstring& str) {
@@ -82,128 +78,148 @@ namespace FBCapture {
 
       FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
 
-			if (this->nvidiaDevice && this->nvEncoder == nullptr) {
-				this->nvEncoder = new NVEncoder(this->device_);
-			}
+      if (this->nvidiaDevice && this->nvEncoder == nullptr) {
+        this->nvEncoder = new NVEncoder(this->device_);
+      }
 
-			if (this->amdDevice && this->amdEncoder == nullptr) {
-				this->amdEncoder = new AMDEncoder(this->device_);
-			}
+      if (this->amdDevice && this->amdEncoder == nullptr) {
+        this->amdEncoder = new AMDEncoder(this->device_);
+      }
 
       if (this->flvMuxer == nullptr) {
-				this->flvMuxer = new FLVMuxer();
+        this->flvMuxer = new FLVMuxer();
       }
 
       if (this->mp4Muxer == nullptr) {
-				this->mp4Muxer = new MP4Muxer();
+        this->mp4Muxer = new MP4Muxer();
       }
 
       if (this->audioCapture == nullptr) {
-				this->audioCapture = new AudioCapture();
+        this->audioCapture = new AudioCapture();
       }
 
       if (this->audioEncoder == nullptr) {
-				this->audioEncoder = new AudioEncoder();
+        this->audioEncoder = new AudioEncoder();
       }
 
       if (this->rtmp == nullptr) {
-				this->rtmp = new LibRTMP();
+        this->rtmp = new LibRTMP();
       }
 
       // Using "%AppData%" folder for saving sliced live video files
       LPWSTR wszPath = nullptr;
       HRESULT hr = SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, nullptr, &wszPath);
       if (SUCCEEDED(hr)) {
-				this->liveFolder = wszPath;
-				this->liveFolder += L"\\FBEncoder\\";
+        this->liveFolder = wszPath;
+        this->liveFolder += L"\\FBEncoder\\";
         if (!CreateDirectory(this->liveFolder.c_str(), nullptr)) {
           if (ERROR_ALREADY_EXISTS == GetLastError()) {
             DEBUG_LOG("Output folder already existed");
           }
         }
+      } else {
+        this->liveFolder.clear();  // Just use root folder when it failed to create folder
       }
-      else {
-				this->liveFolder.clear();  // Just use root folder when it failed to create folder
-      }
-		
+
       return status;
     }
 
-		FBCAPTURE_STATUS EncoderMain::checkGraphicsCardCapability()	{
-			FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
+    FBCAPTURE_STATUS EncoderMain::checkGraphicsCardCapability() {
+      FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
 
-			const int nvidiaVenderID = 4318;  // NVIDIA Vendor ID: 0x10DE
-			const int amdVenderID1 = 4098;	// AMD Vendor ID: 0x1002
-			const int amdVenderID2 = 4130;	// AMD Vendor ID: 0x1022
+      const int nvidiaVenderID = 4318;  // NVIDIA Vendor ID: 0x10DE
+      const int amdVenderID1 = 4098;  // AMD Vendor ID: 0x1002
+      const int amdVenderID2 = 4130;  // AMD Vendor ID: 0x1022
 
-			IDXGIAdapter1 * adapter;
-			std::vector <IDXGIAdapter1*> adapters;
-			IDXGIFactory1* factory = nullptr;
-			DXGI_ADAPTER_DESC1 adapterDescription;
+      ScopedCOMPtr<IDXGIAdapter1> adapter = {};
+      ScopedCOMPtr<IDXGIFactory1> factory = {};
+      DXGI_ADAPTER_DESC1 adapterDescription = {};
 
-			if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&factory))) {
-				DEBUG_ERROR("Failed to create DXGI factory object");
-				return FBCAPTURE_STATUS_DXGI_CREATING_FAILED;
-			}
+      if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&factory))) {
+        DEBUG_ERROR("Failed to create DXGI factory object");
+        return FBCAPTURE_STATUS_DXGI_CREATING_FAILED;
+      }
 
-			for (UINT i = 0; factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND; ++i) {
-				adapter->GetDesc1(&adapterDescription);
+      for (UINT i = 0; factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND; ++i) {
+        adapter->GetDesc1(&adapterDescription);
 
-				// Getting graphics card information in use
-				wstring wDeviceName(adapterDescription.Description);
-				string sDeviceName(wDeviceName.begin(), wDeviceName.end());
-				DEBUG_LOG_VAR("Graphics Card Info: ", sDeviceName);
+        // Getting graphics card information in use
+        wstring wDeviceName(adapterDescription.Description);
+        string sDeviceName(wDeviceName.begin(), wDeviceName.end());
+        DEBUG_LOG_VAR("Graphics Card Info: ", sDeviceName);
 
-				if (adapterDescription.VendorId == nvidiaVenderID) {
-					this->nvidiaDevice = true;
-				}
-				else if (adapterDescription.VendorId == amdVenderID1 || adapterDescription.VendorId == amdVenderID2) {
-					this->amdDevice = true;
-				}
-			}
+        if (adapterDescription.VendorId == nvidiaVenderID) {
+          this->nvidiaDevice = true;
+          break;
+        } else if (adapterDescription.VendorId == amdVenderID1 || adapterDescription.VendorId == amdVenderID2) {
+          this->amdDevice = true;
+          break;
+        }
+      }      
 
-			if (factory) {
-				factory->Release();
-			}
+      if (!this->nvidiaDevice && !this->amdDevice) {
+        DEBUG_ERROR("Unsupported graphics card. The SDK supports only nVidia and AMD GPUs");
+        return FBCAPTURE_STATUS_UNSUPPORTED_GRAPHICS_CARD;
+      }
 
-			if (!this->nvidiaDevice && !this->amdDevice) {
-				DEBUG_ERROR("Unsupported graphics card. The SDK supports only nVidia and AMD GPUs");
-				return FBCAPTURE_STATUS_UNSUPPORTED_GRAPHICS_CARD;
-			}
+      return status;
+    }
 
-			return status;
-		}
+    GRAPHICS_CARD EncoderMain::checkGPUManufacturer() {
+      if (this->amdDevice) {
+        return GRAPHICS_CARD::AMD;
+      } else if (this->nvidiaDevice) {
+        return GRAPHICS_CARD::NVIDIA;
+      } else {
+        return GRAPHICS_CARD::UNSUPPORTED_DEVICE;
+      }
+    }
 
-		GRAPHICS_CARD EncoderMain::checkGPUManufacturer() {
-			if (this->amdDevice) {
-				return GRAPHICS_CARD::AMD;
-			} else if (this->nvidiaDevice) {
-				return GRAPHICS_CARD::NVIDIA;
-			} else {
-				return GRAPHICS_CARD::UNSUPPORTED_DEVICE;
-			}
-		}
+    FBCAPTURE_STATUS EncoderMain::releaseEncodeResources() {
+
+      this->needEncodingSessionInit = true;
+
+      // We want to destroy nvidia encoder only because AMF doesn't open encoding session on AMF init
+      if (this->nvidiaDevice && this->nvEncoder) {
+        return this->nvEncoder->releaseEncodeResources();
+      }
+
+      return FBCAPTURE_STATUS_OK;
+    }
+
+    FBCAPTURE_STATUS EncoderMain::dummyEncodingSession() {
+
+      this->needEncodingSessionInit = true;
+
+      // Only nVidia driver requires real input buffer to destroy encoder clearly.
+      // Otherwise, nVidia driver keeps holding endoer session created before, even though we called "NvEncDestroyEncoder" function.
+      if (this->nvidiaDevice && this->nvEncoder) {
+        return this->nvEncoder->dummyTextureEncoding();
+      }
+
+      return FBCAPTURE_STATUS_OK;
+    }
 
 
-		FBCAPTURE_STATUS EncoderMain::initSessionANDdriverCapabilityCheck()	{
-			FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
+    FBCAPTURE_STATUS EncoderMain::initSessionANDdriverCapabilityCheck() {
+      FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
 
-			if (this->nvidiaDevice && this->nvEncoder) {
-				status = this->nvEncoder->initNVEncodingSession();
-				if(status != FBCAPTURE_STATUS_OK)	{
-					return status;
-				}
-			} else if (this->amdDevice && this->amdEncoder)	{
-				status = this->amdEncoder->initAMDEncodingSession();
-				if (status != FBCAPTURE_STATUS_OK) {
-					return status;
-				}
-			}
+      if (this->nvidiaDevice && this->nvEncoder) {
+        status = this->nvEncoder->initNVEncodingSession();
+        if (status != FBCAPTURE_STATUS_OK) {
+          return status;
+        }
+      } else if (this->amdDevice && this->amdEncoder) {
+        status = this->amdEncoder->initAMDEncodingSession();
+        if (status != FBCAPTURE_STATUS_OK) {
+          return status;
+        }
+      }
 
-			this->needEncodingSessionInit = false;
+      this->needEncodingSessionInit = false;
 
-			return status;
-		}
+      return status;
+    }
 
     wstring EncoderMain::generateLiveVideoFileWString() {
       wstring liveVideoFile = this->prevVideoH264;
@@ -220,17 +236,17 @@ namespace FBCapture {
 
       this->isLive = isLive;
 
-			if(needEncodingSessionInit)	{
-				status = initSessionANDdriverCapabilityCheck();
-				if(status != FBCAPTURE_STATUS_OK)	{
-					return status;
-				}
-			}
-			
-			if (!this->initiatedUnixTime) {
-				this->initiatedUnixTime = true;
-				this->unixTime = std::time(nullptr);  // Using unix time for live video files' identity
-			}
+      if (needEncodingSessionInit) {
+        status = initSessionANDdriverCapabilityCheck();
+        if (status != FBCAPTURE_STATUS_OK) {
+          return status;
+        }
+      }
+
+      if (!this->initiatedUnixTime) {
+        this->initiatedUnixTime = true;
+        this->unixTime = std::time(nullptr);  // Using unix time for live video files' identity
+      }
 
       if (!this->isLive && this->updateInputName) {  // VOD mode
         this->updateInputName = false;
@@ -238,8 +254,7 @@ namespace FBCapture {
         if (this->videoH264.find(this->mp4Extension) != string::npos) {  // Convert file name to h264 when input name is mp4 format
           this->videoH264.replace(this->videoH264.find(this->mp4Extension), this->mp4Extension.length(), this->h264Extension);
         }
-      }
-      else if (this->isLive) {  // Live mode
+      } else if (this->isLive) {  // Live mode
         this->videoH264 = this->liveFolder + to_wstring(this->unixTime) + this->h264Extension;
       }
 
@@ -250,23 +265,21 @@ namespace FBCapture {
           this->stopEncProcess = true;
           return status;
         }
-      }
-      else if (texturePtr && this->amdDevice) {
+      } else if (texturePtr && this->amdDevice) {
         status = this->amdEncoder->encodeMain(texturePtr, this->videoH264, bitrate, fps, needFlipping);
         if (status != FBCAPTURE_STATUS_OK) {
           this->stopEncProcess = true;
           return status;
         }
-      }
-      else {
+      } else {
         DEBUG_LOG("It's invalid texture pointer: null");
       }
 
       return status;
     }
 
-    FBCAPTURE_STATUS EncoderMain::audioEncoding(bool useVRAudioEndpoint, bool enabledAudioCapture, bool enabledMicCapture, 
-																								VRDeviceType vrDevice, LPCWSTR useMicIMMDeviceId) {
+    FBCAPTURE_STATUS EncoderMain::audioEncoding(bool useVRAudioEndpoint, bool enabledAudioCapture, bool enabledMicCapture,
+                                                VRDeviceType vrDevice, LPCWSTR useMicIMMDeviceId) {
       FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
 
       if (this->stopEncProcess || this->videoH264.empty()) {
@@ -275,7 +288,10 @@ namespace FBCapture {
 
       if (this->audioCapture->needToInitializeDevices) {
         status = this->audioCapture->initializeDevices(useVRAudioEndpoint, vrDevice, useMicIMMDeviceId);
-        if (status != FBCAPTURE_STATUS_OK) {
+        if (status == FBCAPTURE_STATUS_AUDIO_DEVICE_ENUMERATION_FAILED) {
+          this->noAvailableAudioDevice = true;
+          return status;
+        } else if (status != FBCAPTURE_STATUS_OK) {
           this->stopEncProcess = true;
           return status;
         }
@@ -352,8 +368,7 @@ namespace FBCapture {
           this->stopEncProcess = true;
           return status;
         }
-      }
-      else if (this->amdDevice) {
+      } else if (this->amdDevice) {
         status = this->amdEncoder->flushInputTextures();
         if (status != FBCAPTURE_STATUS_OK) {
           this->stopEncProcess = true;
@@ -361,8 +376,8 @@ namespace FBCapture {
         }
       }
 
-			this->needEncodingSessionInit = true;
-			this->movingToMuxingStage = true;
+      this->needEncodingSessionInit = true;
+      this->movingToMuxingStage = true;
 
       if (!this->audioCapture->needToInitializeDevices) {
         this->audioCapture->needToCloseCaptureFile = true;
@@ -389,11 +404,17 @@ namespace FBCapture {
         if (this->audioCapture->needToCloseCaptureFile)
           continue;
 
-        // Transcoding wav to aac
-        status = this->audioEncoder->continueAudioTranscoding(this->prevAudioWAV, this->prevAudioAAC);
-        if (status != FBCAPTURE_STATUS_OK) {
-          this->stopEncProcess = true;
-          return status;
+        // Transcoding wav to aac when we get audio input
+        if (this->noAvailableAudioDevice) {
+          this->prevAudioAAC = {};  // Generate video only on muxing layer when no available audio device is attached
+        } else {
+          status = this->audioEncoder->continueAudioTranscoding(this->prevAudioWAV, this->prevAudioAAC);
+          if (status == FBCAPTURE_STATUS_MF_SOURCE_READER_CREATION_FAILED) {
+            this->prevAudioAAC = {};  // Generate video only on muxing layer when we fail to create aac audio file
+          } else if (status != FBCAPTURE_STATUS_OK) {
+            this->stopEncProcess = true;
+            return status;
+          }
         }
 
         // Muxing
@@ -403,8 +424,7 @@ namespace FBCapture {
             this->stopEncProcess = true;
             return status;
           }
-        }
-        else {
+        } else {
           status = this->mp4Muxer->muxingMedia(this->prevVideoH264, this->prevAudioAAC, projectionType, stereMode, is360);
           if (status != FBCAPTURE_STATUS_OK) {
             this->stopEncProcess = true;
@@ -425,7 +445,7 @@ namespace FBCapture {
 
         break;
       }
-			this->movingToMuxingStage = false;
+      this->movingToMuxingStage = false;
       this->isMuxed = true;
       this->stopEncProcess = false;
 
@@ -434,8 +454,8 @@ namespace FBCapture {
 
     FBCAPTURE_STATUS EncoderMain::saveScreenShot(const void* texturePtr, const TCHAR* fullSavePath, bool is360) {
       FBCAPTURE_STATUS status = FBCAPTURE_STATUS_OK;
-					
-			initEncoderComponents();			
+
+      initEncoderComponents();
 
       if (_tcslen(fullSavePath) == 0) {  //No input file path for screenshot
         DEBUG_ERROR("Didn't put screenshot file name");
@@ -452,8 +472,7 @@ namespace FBCapture {
         if (status != FBCAPTURE_STATUS_OK) {
           return status;
         }
-      }
-      else if (texturePtr == nullptr) {
+      } else if (texturePtr == nullptr) {
         DEBUG_ERROR("Invalid render texture pointer(null)");
         return FBCAPTURE_STATUS_INVALID_TEXTURE_POINTER;
       }
@@ -474,8 +493,7 @@ namespace FBCapture {
         if (!liveVideoFile.empty() && (status = this->rtmp->connectRTMPWithFlv(streamUrl, liveVideoFile.c_str())) != FBCAPTURE_STATUS_OK) {
           return status;
         }
-      }
-      else {
+      } else {
         DEBUG_LOG("Need to enable live streaming option in Unity script");
       }
 
@@ -501,19 +519,20 @@ namespace FBCapture {
     }
 
     void EncoderMain::resetResources() {
-			this->initiatedUnixTime = false;
+      this->initiatedUnixTime = false;
       this->stopEncProcess = false;
       this->isLive = false;
       this->unixTime = 0;
       this->updateInputName = true;
       this->isMuxed = false;
       this->stopEncodingSession = false;
-			this->needEncodingSessionInit = true;
-			this->movingToMuxingStage = false;
+      this->needEncodingSessionInit = true;
+      this->movingToMuxingStage = false;
+      this->noAvailableAudioDevice = false;
     }
 
     void EncoderMain::setGraphicsDeviceD3D11(ID3D11Device* device) {
-        this->device_ = (ID3D11Device*)device;
+      this->device_ = (ID3D11Device*)device;
     }
   }
 }

@@ -57,7 +57,7 @@ namespace FBCapture {
 			FBCAPTURE_STATUS initAMDEncodingSession();
 			FBCAPTURE_STATUS encodeMain(const void* texturePtr, const wstring& fullSavePath, int bitrate, int fps, bool needFlipping);
 			FBCAPTURE_STATUS flushInputTextures();
-			FBCAPTURE_STATUS saveScreenShot(const void* texturePtr, const wstring& fullSavePath, bool is360);
+			FBCAPTURE_STATUS saveScreenShot(const void* texturePtr, const wstring& fullSavePath, bool is360);			
 			AMDEncoder(ID3D11Device* device);  // Constructor
 			virtual ~AMDEncoder();
 		protected:
@@ -82,7 +82,7 @@ namespace FBCapture {
 
 			// DX 11 interfaces  
 			ID3D11Texture2D* fromTexturePtr_ = nullptr;						
-			ScopedCOMPtr<ID3D11Device> device_ = nullptr;
+			ID3D11Device* device_ = nullptr;
 			D3D11_BOX dirtyRegion_ = {};
 			D3D11_TEXTURE2D_DESC globalTexDesc_ = {};
 

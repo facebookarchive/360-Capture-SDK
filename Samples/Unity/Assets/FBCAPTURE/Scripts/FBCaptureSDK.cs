@@ -4,7 +4,6 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using UnityEditor;
 using UnityEngine.Rendering;
 using UnityEngine.VR;
 
@@ -145,7 +144,7 @@ namespace FBCapture {
         private static extern FBCAPTURE_STATUS fbc_saveScreenShot(IntPtr texturePtr);
         [DllImport("FBCapture", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         private static extern GRAPHICS_CARD fbc_checkGPUManufacturer();
-        
+
 
         private const int ERROR_VIDEO_ENCODING_CAUSE_ERRORS = 100;
         private const int ERROR_AUDIO_ENCODING_CAUSE_ERRORS = 200;
@@ -413,7 +412,7 @@ namespace FBCapture {
 
         //    Callback for error handling
         public delegate void OnStatusCallback(CAPTURE_ERROR error, FBCAPTURE_STATUS? captureStatus);
-        public event OnStatusCallback OnError = delegate {};
+        public event OnStatusCallback OnError = delegate { };
 
         // Private Members
         private bool captureStarted = false;
@@ -527,13 +526,20 @@ namespace FBCapture {
 
             // Retrieve attached VR devie for sound and microphone capture in VR
             // If expected VR device is not attached, it will capture default audio device
-            string vrDeviceName = VRDevice.model.ToLower();
+            string vrDeviceName = UnityEngine.XR.XRDevice.model.ToLower();
             if (vrDeviceName.Contains("rift")) {
                 attachedHMD = VRDEVICE_TYPE.OCULUS_RIFT;
             } else if (vrDeviceName.Contains("vive")) {
                 attachedHMD = VRDEVICE_TYPE.HTC_VIVE;
             } else {
                 attachedHMD = VRDEVICE_TYPE.UNKNOWN;
+            }
+
+            // Check hardware capability for screenshot
+            FBCAPTURE_STATUS status;
+            status = fbc_getCaptureCapability();
+            if (status != FBCAPTURE_STATUS.OK) {
+                OnError(CAPTURE_ERROR.SCREENSHOT_FAILED_TO_START, status);
             }
         }
 
@@ -566,6 +572,7 @@ namespace FBCapture {
             }
 
             if (screenshotStarted) {
+                non360Camera.Render();
                 screenshotReady = true;
             }
 
@@ -640,13 +647,13 @@ namespace FBCapture {
             // MAX video encoding resolution
             // AMD:     4096 x 2048
             // NVIDIA:  4096 x 4096
-            if (GRAPHICS_CARD.AMD == fbc_checkGPUManufacturer() && 
-                (liveVideoWidth > 4096 || 
+            if (GRAPHICS_CARD.AMD == fbc_checkGPUManufacturer() &&
+                (liveVideoWidth > 4096 ||
                 (captureTextureFormat == CAPTURE_TEXTURE_FORMAT.RGBD_CAPTURE ? liveVideoHeight * 2 : liveVideoHeight) > 2048)) {
                 Debug.Log("Max video encoding resolution on AMD is 4096 x 2048");
                 OnError(CAPTURE_ERROR.UNSUPPORTED_SPEC, null);
                 return false;
-            } else if (GRAPHICS_CARD.NVIDIA == fbc_checkGPUManufacturer() && 
+            } else if (GRAPHICS_CARD.NVIDIA == fbc_checkGPUManufacturer() &&
                        (liveVideoWidth > 4096 ||
                        (captureTextureFormat == CAPTURE_TEXTURE_FORMAT.RGBD_CAPTURE ? liveVideoHeight * 2 : liveVideoHeight) > 4096)) {
                 Debug.Log("Max video encoding resolution on NVIDIA is 4096 x 4096");
@@ -660,7 +667,7 @@ namespace FBCapture {
 
             // Create RenderTextures which will be used for live video encoding
             CreateRenderTextures(liveVideoWidth, liveVideoHeight);
-           
+
             // Video Encoding and Live Configuration Settings
             status = fbc_setLiveCaptureSettings(
                             width: outputWidth,
@@ -910,13 +917,6 @@ namespace FBCapture {
                 savePath = fullScreenshotSavePath;
             }
 
-            // Check hardware capability for screenshot
-            status = fbc_getCaptureCapability();
-            if (status != FBCAPTURE_STATUS.OK) {
-                OnError(CAPTURE_ERROR.SCREENSHOT_FAILED_TO_START, status);
-                return false;
-            }
-
             // Screenshot Configuration Settings in FBCapture SDK 
             status = fbc_setScreenshotSettings(
                             width: outputWidth,
@@ -943,7 +943,7 @@ namespace FBCapture {
         /// Capture Stop Routine with Unity resource release
         /// </summary>
         public void StopCapture() {
-            if (captureStarted != screenshotStarted) {
+            if (captureStarted) {
 
                 fbc_stopCapture();
 
@@ -956,11 +956,6 @@ namespace FBCapture {
                 if (depthEquirectTexture) {
                     Destroy(depthEquirectTexture);
                     depthEquirectTexture = null;
-                }
-
-                if (outputTexture) {
-                    Destroy(outputTexture);
-                    outputTexture = null;
                 }
 
                 if (cubemapTexture) {
@@ -1069,7 +1064,6 @@ namespace FBCapture {
                     if (status != FBCAPTURE_STATUS.OK) {
                         OnError(CAPTURE_ERROR.SCREENSHOT_FAILED, status);
                     }
-                    StopCapture();
                     screenshotStarted = false;
                 }
             }
@@ -1158,9 +1152,10 @@ namespace FBCapture {
             outputWidth = width;
             outputHeight = height;
 
-            outputTexture = new RenderTexture(outputWidth, captureTextureFormat == CAPTURE_TEXTURE_FORMAT.RGBD_CAPTURE ? outputHeight * 2 : outputHeight, 0, RenderTextureFormat.ARGB32);
+            outputTexture = new RenderTexture(outputWidth, captureTextureFormat == CAPTURE_TEXTURE_FORMAT.RGBD_CAPTURE ? outputHeight * 2 : outputHeight, 24, RenderTextureFormat.ARGB32);
             outputTexture.hideFlags = HideFlags.HideAndDontSave;
             outputTexture.Create();
+            non360Camera.targetTexture = outputTexture;
 
             if (captureMode == CAPTURE_MODE._360_CAPTURE) {
                 if (projectionType == PROJECTION_TYPE.EQUIRECT) {
@@ -1230,6 +1225,7 @@ namespace FBCapture {
 
 
         void OnRenderImage(RenderTexture src, RenderTexture dst) {
+            Graphics.Blit(src, dst);
             StartCoroutine(ScreenBufferBlit(null, src, dst));
         }
 

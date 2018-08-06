@@ -43,10 +43,11 @@ namespace FBCapture {
 			bool silenceMode = false;
 			atomic<bool> updateInputName = true;  // Set true when need to update Unix time for unique live video and audio file names
 			atomic<bool> stopEncProcess = false;  // Stop encoding process when any critical encoding process is failed
-			atomic<bool> isMuxed = false; // Set to be true after muxing
-			atomic<bool> stopEncodingSession = false; // Set to be true after muxing
+			atomic<bool> isMuxed = false;  // Set to be true after muxing
+			atomic<bool> stopEncodingSession = false;  // Set to be true after muxing
+			atomic<bool> noAvailableAudioDevice = false;  // Set to be true when available audio divice is not attached
 
-																					// Strings for folder
+			// Strings for folder
 			wstring liveFolder = {};
 			wstring videoH264 = {};
 			wstring prevVideoH264 = {};
@@ -72,6 +73,8 @@ namespace FBCapture {
 			FBCAPTURE_STATUS initEncoderComponents();
 			FBCAPTURE_STATUS checkGraphicsCardCapability();
 			FBCAPTURE_STATUS initSessionANDdriverCapabilityCheck();
+			FBCAPTURE_STATUS releaseEncodeResources();
+			FBCAPTURE_STATUS dummyEncodingSession();
 			vector<wstring> splitString(wstring& str);
 			FBCAPTURE_STATUS startEncoding(const void* texturePtr, const TCHAR* fullSavePath, bool isLive, int bitrate, int fps, bool needFlipping);
 			FBCAPTURE_STATUS audioEncoding(bool useVRAudioEndpoint, bool enabledAudioCapture, bool enabledMicCapture, VRDeviceType vrDevice, LPCWSTR useMicIMMDeviceId);

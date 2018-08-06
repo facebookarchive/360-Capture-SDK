@@ -15,29 +15,27 @@ Copyright	:
 namespace FBCapture {
   namespace Audio {
 
-    IMMDeviceEnumerator* AudioCapture::mmDeviceEnumerator_ = { 0 };
-    IAudioCaptureClient* AudioCapture::outputAudioCaptureClient_ = { 0 };
-    IAudioClient* AudioCapture::outputAudioClient_ = { 0 };
-    IMMDevice* AudioCapture::mmOutputDevice_ = { 0 };
+    IMMDeviceEnumerator* AudioCapture::mmDeviceEnumerator_ = {};
+    IAudioCaptureClient* AudioCapture::outputAudioCaptureClient_ = {};
+    IAudioClient* AudioCapture::outputAudioClient_ = {};
+    IMMDevice* AudioCapture::mmOutputDevice_ = {};
     UINT32 AudioCapture::outputBlockAlign_ = 0;
-    IAudioCaptureClient* AudioCapture::inputAudioCaptureClient_ = { 0 };
-    IAudioClient* AudioCapture::inputAudioClient_ = { 0 };
-    IMMDevice* AudioCapture::mmInputDevice_ = { 0 };
+    IAudioCaptureClient* AudioCapture::inputAudioCaptureClient_ = {};
+    IAudioClient* AudioCapture::inputAudioClient_ = {};
+    IMMDevice* AudioCapture::mmInputDevice_ = {};
     UINT32 AudioCapture::inputBlockAlign_ = 0;
 
-    HMMIO AudioCapture::file_ = { 0 };
-    MMCKINFO AudioCapture::ckRIFF_ = { 0 };
-    MMCKINFO AudioCapture::ckData_ = { 0 };
-    MMCKINFO AudioCapture::ckFMT_ = { 0 };
+    HMMIO AudioCapture::file_ = {};
+    MMCKINFO AudioCapture::ckRIFF_ = {};
+    MMCKINFO AudioCapture::ckData_ = {};
+    MMCKINFO AudioCapture::ckFMT_ = {};
 
     wstring AudioCapture::wavFileName_;
     LPCWSTR AudioCapture::fileName_ = nullptr;
-    LONG AudioCapture::outputBytesToWrite_;
-    LONG AudioCapture::inputBytesToWrite_;
     BYTE* AudioCapture::outputData_ = nullptr;
     BYTE* AudioCapture::inputData_ = nullptr;
-    WAVEFORMATEX* AudioCapture::outputPWFX_ = { 0 };
-    WAVEFORMATEX* AudioCapture::inputPWFX_ = { 0 };
+    WAVEFORMATEX* AudioCapture::outputPWFX_ = {};
+    WAVEFORMATEX* AudioCapture::inputPWFX_ = {};
     size_t AudioCapture::captureIndex_ = 0;
     AudioBuffer* AudioCapture::buffer_ = nullptr;
 
@@ -46,6 +44,7 @@ namespace FBCapture {
       needToInitializeDevices = true;
       needToCloseCaptureFile = false;
       needToOpenCaptureFile = true;
+      lastAudioCapture_ = std::chrono::steady_clock::now();
 
 			// Riff chunk
 			ckRIFF_.ckid = MAKEFOURCC('R', 'I', 'F', 'F');
@@ -65,10 +64,10 @@ namespace FBCapture {
 
     bool AudioCapture::findAudioSource(bool isMic, LPCWSTR withIMMDeviceId) {
       bool ret = false;
-      IMMDevice* pickDevice = NULL;
+      IMMDevice* pickDevice = {};
 
       HRESULT hr = mmDeviceEnumerator_->GetDevice(withIMMDeviceId, &pickDevice);
-      if (SUCCEEDED(hr) && pickDevice != NULL) {
+      if (SUCCEEDED(hr) && pickDevice != nullptr) {
 	      if (isMic) {
 		      mmInputDevice_ = pickDevice;
 	      }
@@ -87,11 +86,11 @@ namespace FBCapture {
     bool AudioCapture::findVRDeviceAudioSource(bool isMic, VRDeviceType vrDevice) {
       HRESULT hr = S_OK;
       bool ret = false;
-      IMMDeviceCollection *pCollection = NULL;
-      IMMDevice* pickDevice = NULL;
+      IMMDeviceCollection *pCollection = {};
+      IMMDevice* pickDevice = {};
       UINT  count = 0;
-      LPWSTR pwszID = NULL;
-      IPropertyStore *pProps = NULL;
+      LPWSTR pwszID = {};
+      IPropertyStore *pProps = {};
       string AudioSourcesName;
 
       if (vrDevice == OCULUS_RIFT) {
@@ -147,7 +146,7 @@ namespace FBCapture {
 
     Exit:
       CoTaskMemFree(pwszID);
-      pwszID = NULL;
+      pwszID = {};
       PropVariantClear(&varName);
       SAFE_RELEASE(pProps);
       SAFE_RELEASE(pickDevice);
@@ -165,11 +164,11 @@ namespace FBCapture {
     }
 
     static HRESULT isAudioWaveFormatSupported(IAudioClient* audioClient, WAVEFORMATEX* format) {
-      WAVEFORMATEX* closestFormat = NULL;
+      WAVEFORMATEX* closestFormat = {};
       HRESULT hr = audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_SHARED, format, &closestFormat);
       if (closestFormat) {
         CoTaskMemFree(closestFormat);
-        closestFormat = NULL;
+        closestFormat = {};
       }
       return hr;
     }
@@ -259,7 +258,7 @@ namespace FBCapture {
       }
 
       REFERENCE_TIME hnsBufferDuration = defaultDevicePeriod * 8; //TODO Pass in as configuration
-	  hr = audioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, isInput ? 0 : AUDCLNT_STREAMFLAGS_LOOPBACK, hnsBufferDuration, 0, isInput ? inputPWFX_ : outputPWFX_, NULL);
+	  hr = audioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, isInput ? 0 : AUDCLNT_STREAMFLAGS_LOOPBACK, hnsBufferDuration, 0, isInput ? inputPWFX_ : outputPWFX_, nullptr);
 	  if (FAILED(hr)) {
 		DEBUG_ERROR_VAR("Failed to initialize audio client. [Error code] ", to_string(hr));
 		DEBUG_LOG_VAR("HnsBufferDuration requested: ", to_string(hnsBufferDuration));
@@ -290,7 +289,7 @@ namespace FBCapture {
         return false;
       }
 
-      IAudioCaptureClient* client = NULL;
+      IAudioCaptureClient* client = nullptr;
 
       hr = audioClient->GetService(__uuidof(IAudioCaptureClient), (void**)&client);
       if (FAILED(hr)) {
@@ -318,6 +317,7 @@ namespace FBCapture {
       openFile(wavFileName_.c_str(), &file_);
 
       if (!writeWaveHeader(outputPWFX_, &file_)) {
+        closeCaptureFile();
         DEBUG_ERROR("Failed to write wave header");
         return FBCAPTURE_STATUS_WRITING_WAV_HEADER_FAILED;
       }
@@ -338,7 +338,7 @@ namespace FBCapture {
       buffer_ = new AudioBuffer();
 
       hr = CoCreateInstance(
-        __uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL,
+        __uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
         __uuidof(IMMDeviceEnumerator),
         (void**)&mmDeviceEnumerator_
       );
@@ -347,27 +347,34 @@ namespace FBCapture {
         return FBCAPTURE_STATUS_AUDIO_DEVICE_ENUMERATION_FAILED;
       }
 
-      if (useVRAudioResources_ && (!findVRDeviceAudioSource(true, vrDevice) || !findVRDeviceAudioSource(false, vrDevice))) {
-				DEBUG_LOG("Can't find VR audio devices. Just use default audio input and output");
-				hr = mmDeviceEnumerator_->GetDefaultAudioEndpoint(eRender, eConsole, &mmOutputDevice_);
-				if (FAILED(hr)) {
-					DEBUG_ERROR_VAR("Failed to get default output audio endpoint with GetDefaultAudioEndpoint. [Error code] ", to_string(hr));
-					return FBCAPTURE_STATUS_AUDIO_DEVICE_ENUMERATION_FAILED;
+			if (useVRAudioResources_) {
+				if (!findVRDeviceAudioSource(false, vrDevice)) {
+					DEBUG_LOG("Can't find VR output audio device. Just try using default audio output");
+					hr = mmDeviceEnumerator_->GetDefaultAudioEndpoint(eRender, eConsole, &mmOutputDevice_);
+					if (FAILED(hr)) {						
+						DEBUG_ERROR_VAR("Failed to get default output audio endpoint with GetDefaultAudioEndpoint. [Error code] ", to_string(hr));		
+						DEBUG_ERROR("We need to pick at least one output audio resource. Now it will capture without audio");
+						return FBCAPTURE_STATUS_AUDIO_DEVICE_ENUMERATION_FAILED;
+					}
 				}
-				hr = mmDeviceEnumerator_->GetDefaultAudioEndpoint(eCapture, eConsole, &mmInputDevice_);
-				if (FAILED(hr)) {
-					DEBUG_ERROR_VAR("Failed to get default input audio endpoint with GetDefaultAudioEndpoint. [Error code] ", to_string(hr));
-					DEBUG_LOG("But we want to keep going without microphone");
-					useMicrophone_ = false;
+
+				if (!findVRDeviceAudioSource(true, vrDevice)) {
+					DEBUG_LOG("Can't find VR input audio devices. Just try using default audio input");
+					hr = mmDeviceEnumerator_->GetDefaultAudioEndpoint(eCapture, eConsole, &mmInputDevice_);
+					if (FAILED(hr)) {
+						DEBUG_ERROR_VAR("Failed to get default input audio endpoint with GetDefaultAudioEndpoint. [Error code] ", to_string(hr));					
+						DEBUG_ERROR("But we want to keep capturing output audio without input resource(mic)");
+						useMicrophone_ = false;
+					}
 				}
-      } else if (!useVRAudioResources_) {
+			}	else if (!useVRAudioResources_) {
         // Use default audio endpoint when we don't want to use VR devices as audio source
         hr = mmDeviceEnumerator_->GetDefaultAudioEndpoint(eRender, eConsole, &mmOutputDevice_);
         if (FAILED(hr)) {
           DEBUG_ERROR_VAR("Failed to get default audio endpoint with GetDefaultAudioEndpoint. [Error code] ", to_string(hr));
           return FBCAPTURE_STATUS_AUDIO_DEVICE_ENUMERATION_FAILED;
         }
-				if (useMicIMMDeviceId == NULL) {
+				if (useMicIMMDeviceId == nullptr) {
 					useMicrophone_ = false;
 				} else {
 					useMicrophone_ = findAudioSource(true, useMicIMMDeviceId);
@@ -377,19 +384,20 @@ namespace FBCapture {
 				}
       }
 
-      hr = mmOutputDevice_->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&outputAudioClient_);
-      if (FAILED(hr)) {
-        DEBUG_ERROR_VAR("Failed to activate audio client", to_string(hr));
-        return FBCAPTURE_STATUS_AUDIO_CLIENT_INIT_FAILED;
-      }
+			if (mmOutputDevice_) {
+				hr = mmOutputDevice_->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr, (void**)&outputAudioClient_);
+				if (FAILED(hr)) {
+					DEBUG_ERROR_VAR("Failed to activate audio client", to_string(hr));
+					return FBCAPTURE_STATUS_AUDIO_CLIENT_INIT_FAILED;
+				}
+				if (!startAudioclient(outputAudioClient_, &outputAudioCaptureClient_, false)) {
+					DEBUG_ERROR("Failed to start output audio client");
+					return FBCAPTURE_STATUS_AUDIO_CLIENT_INIT_FAILED;
+				}
+			}
 
-      if (!startAudioclient(outputAudioClient_, &outputAudioCaptureClient_, false)) {
-        DEBUG_ERROR("Failed to start output audio client");
-        return FBCAPTURE_STATUS_AUDIO_CLIENT_INIT_FAILED;
-      }
-
-      if (useMicrophone_) {
-        hr = mmInputDevice_->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&inputAudioClient_);
+      if (mmInputDevice_) {
+        hr = mmInputDevice_->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr, (void**)&inputAudioClient_);
         if (FAILED(hr)) {
           DEBUG_ERROR_VAR("Failed to activate audio client. [Error code] ", to_string(hr));
           return FBCAPTURE_STATUS_AUDIO_CLIENT_INIT_FAILED;
@@ -411,12 +419,17 @@ namespace FBCapture {
       }
 
       needToInitializeDevices = false;
+      lastAudioCapture_ = std::chrono::steady_clock::now();
 
       return FBCAPTURE_STATUS_OK;
     }
 
-
     void AudioCapture::continueAudioCapture(bool enabledAudioCapture, bool enabledMicCapture) {
+			
+			if (outputAudioCaptureClient_ == nullptr) {
+				return;
+			}
+
       HRESULT hr = S_OK;
       UINT32 nNextPacketSize = 0;
       UINT32 outputNumFramesToRead = 0;
@@ -424,24 +437,43 @@ namespace FBCapture {
       UINT64 outputPosition = 0;
       UINT64 inputPosition = 0;
       DWORD dwFlags = 0;
+      UINT32 outputFramesRead = 0;
+      UINT32 inputFramesRead = 0;
+      UINT32 expectedOutputFramesToRead = 0;
+      UINT32 expectedInputFramesToRead = 0;
 
-      // Write Output Data
+      auto now = std::chrono::steady_clock::now();
+      auto diffMilliseconds =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now -
+          lastAudioCapture_)
+        .count();
+
+      if (outputPWFX_) {
+        expectedOutputFramesToRead = outputPWFX_->nSamplesPerSec / 1000 * (diffMilliseconds);
+      }
+      if (inputPWFX_) {
+        expectedInputFramesToRead = inputPWFX_->nSamplesPerSec / 1000 * (diffMilliseconds);
+      }
+
+      lastAudioCapture_ = now;		
+
+			// Write Output Data
 			for (hr = outputAudioCaptureClient_->GetNextPacketSize(&nNextPacketSize);	SUCCEEDED(hr) &&
 					 nNextPacketSize > 0;
 					 hr = outputAudioCaptureClient_->GetNextPacketSize(&nNextPacketSize)) {
 
 				//** audio data from speaker
-				hr = outputAudioCaptureClient_->GetBuffer(&outputData_, &outputNumFramesToRead, &dwFlags, &outputPosition, NULL);
+				hr = outputAudioCaptureClient_->GetBuffer(&outputData_, &outputNumFramesToRead, &dwFlags, &outputPosition, nullptr);
 				if (FAILED(hr)) {
 					DEBUG_ERROR_VAR("Failed to get buffer from IAudioCaptureClient::GetBuffer", to_string(hr));
 					break;
 				}
 
+				outputFramesRead += outputNumFramesToRead;
+
 				if (AUDCLNT_BUFFERFLAGS_SILENT == dwFlags) {
 					DEBUG_LOG("Silent status without any audio");
 				}
-
-				outputBytesToWrite_ = outputNumFramesToRead * outputBlockAlign_;
 
 				if (0 == outputNumFramesToRead) {
 					DEBUG_LOG("No data can be read from Speaker--IAudioCaptureClient::GetBuffer");
@@ -455,19 +487,18 @@ namespace FBCapture {
 
 				buffer_->write(BufferIndex_Headphones, reinterpret_cast<int16_t*>(outputData_), outputNumFramesToRead); // PAS check this length!
 
-
-				if (useMicrophone_ && inputAudioCaptureClient_) {
-					hr = inputAudioCaptureClient_->GetBuffer(&inputData_, &inputNumFramesToRead, &dwFlags, &inputPosition, NULL);
+				if (mmInputDevice_ && inputAudioCaptureClient_) {
+					hr = inputAudioCaptureClient_->GetBuffer(&inputData_, &inputNumFramesToRead, &dwFlags, &inputPosition, nullptr);
 					if (FAILED(hr)) {
 						DEBUG_ERROR_VAR("Failed to get buffer from IAudioCaptureClient::GetBuffer", to_string(hr));
 						break;
 					}
 
+					inputFramesRead += inputNumFramesToRead;
+
 					if (AUDCLNT_BUFFERFLAGS_SILENT == dwFlags) {
 						DEBUG_LOG("Silent status without any audio");
 					}
-
-					inputBytesToWrite_ = inputNumFramesToRead * inputBlockAlign_;
 
 					if (0 == inputNumFramesToRead) {
 						DEBUG_LOG("No data can be read from Microphone--IAudioCaptureClient::GetBuffer");
@@ -481,12 +512,43 @@ namespace FBCapture {
 					buffer_->write(BufferIndex_Microphone, reinterpret_cast<int16_t*>(inputData_), inputNumFramesToRead); // PAS check this length!
 				}
 
-
 				const int16_t* finalOutput = nullptr;
 				size_t length = 0;
 				buffer_->getBuffer(&finalOutput, &length, enabledAudioCapture, enabledMicCapture);
 				mmioWrite(file_, reinterpret_cast<PCCH>(finalOutput), length * sizeof(int16_t));
 			}
+
+      static std::vector<BYTE> silence;
+
+      bool forcedSilence = false;
+      if (outputFramesRead == 0) {
+        DWORD state;
+        mmOutputDevice_->GetState(&state);
+        if (state != DEVICE_STATE_ACTIVE) {
+          silence.resize(expectedOutputFramesToRead * outputPWFX_->nChannels * sizeof(int16_t), 0);
+          buffer_->write(BufferIndex_Headphones, reinterpret_cast<int16_t*>(&silence[0]), expectedOutputFramesToRead);
+          forcedSilence = true;
+          enabledAudioCapture = false;
+        }
+      }
+
+      if (useMicrophone_ && inputAudioCaptureClient_ && inputFramesRead == 0) {
+        DWORD state;
+        mmInputDevice_->GetState(&state);
+        if (state != DEVICE_STATE_ACTIVE) {
+          silence.resize(expectedInputFramesToRead * inputPWFX_->nChannels * sizeof(int16_t), 0);
+          buffer_->write(BufferIndex_Microphone, reinterpret_cast<int16_t*>(&silence[0]), expectedInputFramesToRead);
+          forcedSilence = true;
+          enabledMicCapture = false;
+        }
+      }
+
+      if (forcedSilence) {
+        const int16_t* finalOutput = nullptr;
+        size_t length = 0;
+        buffer_->getBuffer(&finalOutput, &length, enabledAudioCapture, enabledMicCapture);
+        mmioWrite(file_, reinterpret_cast<PCCH>(finalOutput), length * sizeof(int16_t));
+      }
 		}
 
     bool AudioCapture::openFile(LPCWSTR szFileName, HMMIO *phFile) {
@@ -495,11 +557,11 @@ namespace FBCapture {
         // some flags cause mmioOpen write to this buffer
         // but not any that we're using
         const_cast<LPWSTR>(fileName_),
-        NULL,
+				nullptr,
         MMIO_CREATE | MMIO_WRITE | MMIO_EXCLUSIVE
       );
 
-      if (NULL == *phFile) {
+      if (nullptr == *phFile) {
         DEBUG_ERROR("Failed to create raw audio file.");
         return false;
       }
@@ -551,21 +613,25 @@ namespace FBCapture {
     FBCAPTURE_STATUS AudioCapture::closeCaptureFile() {
 
       if (file_) {
+
+        auto cleanupHandler = [](HMMIO__* ptr) {
+          mmioClose(ptr, 0);
+          file_ = nullptr;
+        };
+        auto filePtr = std::unique_ptr<HMMIO__, decltype(cleanupHandler)>(file_, cleanupHandler);
+
         MMRESULT hr;
-        hr = mmioAscend(file_, &ckData_, 0);
+        hr = mmioAscend(filePtr.get(), &ckData_, 0);
         if (MMSYSERR_NOERROR != hr) {
           DEBUG_LOG_VAR("Failed to ascend out of a chunk in a RIFF file. [Error code] ", to_string(hr));
           return FBCAPTURE_STATUS_RELEASING_WAV_FAILED;
         }
 
-        hr = mmioAscend(file_, &ckRIFF_, 0);
+        hr = mmioAscend(filePtr.get(), &ckRIFF_, 0);
         if (MMSYSERR_NOERROR != hr) {
           DEBUG_LOG_VAR("Failed to ascend out of a chunk in a Data file. [Error code] ", to_string(hr));
           return FBCAPTURE_STATUS_RELEASING_WAV_FAILED;
         }
-
-        mmioClose(file_, 0);
-        file_ = nullptr;
 
         DEBUG_LOG("Released wave file resources");
       }
@@ -579,31 +645,31 @@ namespace FBCapture {
     void AudioCapture::closeDevices() {
       if (inputPWFX_) {
         CoTaskMemFree(inputPWFX_);
-        inputPWFX_ = { 0 };
+        inputPWFX_ = {};
       }
       if (outputPWFX_) {
         CoTaskMemFree(outputPWFX_);
-        outputPWFX_ = { 0 };
+        outputPWFX_ = {};
       }
       if (outputAudioCaptureClient_) {
         outputAudioCaptureClient_->Release();
-        outputAudioCaptureClient_ = { 0 };
+        outputAudioCaptureClient_ = {};
       }
       if (outputAudioClient_) {
         outputAudioClient_->Release();
-        outputAudioClient_ = { 0 };
+        outputAudioClient_ = {};
       }
       if (mmOutputDevice_) {
         mmOutputDevice_->Release();
-        mmOutputDevice_ = { 0 };
+        mmOutputDevice_ = {};
       }
       if (inputAudioCaptureClient_) {
         inputAudioCaptureClient_->Release();
-        inputAudioCaptureClient_ = { 0 };
+        inputAudioCaptureClient_ = {};
       }
       if (mmInputDevice_) {
         mmInputDevice_->Release();
-        mmInputDevice_ = { 0 };
+        mmInputDevice_ = {};
       }
       if (buffer_) {
         delete buffer_;

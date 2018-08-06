@@ -18,6 +18,7 @@ namespace FBCapture {
       file_ = NULL;
       rtmp_ = NULL;
       initializedRTMPSession_ = false;
+      initializedSocket_ = false;
       timestamp_ = 0;
       preFrameTime_ = 0;
       lastFrameTime_ = 0;
@@ -74,7 +75,13 @@ namespace FBCapture {
       WORD version;
       WSADATA wsaData;
       version = MAKEWORD(2, 2);
-      return (WSAStartup(version, &wsaData) == 0);
+      if (WSAStartup(version, &wsaData) == 0) {
+        initializedSocket_ = true;
+        return TRUE;
+      }
+      else {
+        return FALSE;
+      }
 #else
       return TRUE;
 #endif
@@ -389,7 +396,10 @@ namespace FBCapture {
         packet_ = NULL;
       }
 
-      WSACleanup();
+      if (initializedSocket_) {
+        WSACleanup();
+        initializedSocket_ = false;
+      }
     }
   }
 }
