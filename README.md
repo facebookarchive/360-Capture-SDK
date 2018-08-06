@@ -118,9 +118,11 @@ FBCapture prefab handles all encoding and screenshot sessions with “FBCapture.
    * Shader Settings
        * The shaders will generate cubemap, equirect textures with Surround Capture Cameras. 
 
+**4. FBCapture SDK LOG SAVE PATH**
+LOG file will be saved in "%LOCALAPPDATA%\FBCapture" and the log file will be named with process name and timestamp to have unique log file per process. (ex. %LOCALAPPDATA%\FBCapture\FBCaptureSDK_processname_timestamp.txt)
+If you want to change save path or naming convention, please refer to Log.cpp file. 
 
-
-**4. FBCapture SDK Calling Conventions (Sample Unity C# Integration Code)**
+**5. FBCapture SDK Calling Conventions (Sample Unity C# Integration Code)**
 
    **1. Set up Session** 
 APIs needed to be called once at start encoding
