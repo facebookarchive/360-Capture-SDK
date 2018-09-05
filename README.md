@@ -1,3 +1,12 @@
+# FBCAPTURE SDK 2.25 DOCUMENTATION
+
+## Release Note
+
+* Fixed creating DirectX device on wrong GPU at multiple GPU environment
+  * There was bug picking wrong GPU to create DirectX device at multiple GPU environment. For example, when you have Intel, AMD and nVidia GPUs at one PC and one of monitors or VR devices are connected to AMD, then there was potential issue it creates the DirectX device on nVidia. But this version will fix the problem.
+* Fixed blank screenshot output in Unity sample
+  * Because of wrong Unity render texture update cycle, it used to generate blank screenshot with just black color, but this version will fix the issue. 
+
 # FBCAPTURE SDK 2.2 DOCUMENTATION
 
 ## Release Note
