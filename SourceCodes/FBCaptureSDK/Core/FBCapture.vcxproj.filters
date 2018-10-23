@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{c55a2c32-7477-4c0d-8cd8-c1d4d8734586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{bcc55e9b-7839-4e58-b77c-076a8df44f9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encoder">
+      <UniqueIdentifier>{b1d12125-e68f-4b57-a779-2775101a7204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{98b81fe6-9308-433d-adc0-256f63a9ce50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Microphone">
+      <UniqueIdentifier>{c7ad3a05-2a0b-4dda-aba8-35e4f0d648f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RTMP">
+      <UniqueIdentifier>{4198f15b-d09e-40ef-93ba-0f7d72f07a3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Screenshot">
+      <UniqueIdentifier>{a562441e-77ce-4928-b2d8-a46f7b47ca68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encoder\AMF">
+      <UniqueIdentifier>{c8eb2688-14d3-45bd-b619-613eb6653bea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encoder\NVENC">
+      <UniqueIdentifier>{94a563ef-6dcc-41e3-9457-81222c53804f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera\CameraDeviceManager.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera\CameraDevices.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera\CameraReader.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Log.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\AudioBuffer.cpp">
+      <Filter>Encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\AudioCapture.cpp">
+      <Filter>Encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\AudioEncoder.cpp">
+      <Filter>Encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\FLVmuxer.cpp">
+      <Filter>Encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\MP4muxer.cpp">
+      <Filter>Encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\GraphicsDeviceCaptureD3D11.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\IGraphicsDeviceCapture.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\TextureRender.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Microphone\MicDevices.cpp">
+      <Filter>Microphone</Filter>
+    </ClCompile>
+    <ClCompile Include="RTMP\LibRTMP.cpp">
+      <Filter>RTMP</Filter>
+    </ClCompile>
+    <ClCompile Include="Screenshot\ScreenGrab.cpp">
+      <Filter>Screenshot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NVidia\common\src\NvHWEncoder.cpp">
+      <Filter>Encoder\NVENC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\AMFFactory.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\AMFSTL.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamFactory.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamFile.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\DataStreamMemory.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\Thread.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\Windows\ThreadWindows.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AMD\common\TraceAdapter.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\AMDEncoder.cpp">
+      <Filter>Encoder\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder\NVEncoder.cpp">
+      <Filter>Encoder\NVENC</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera\CameraDeviceManager.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\CameraDevices.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\CameraReader.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Log.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ScopedCOMem.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ScopedCOMPtr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\AudioBuffer.h">
+      <Filter>Encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\AudioCapture.h">
+      <Filter>Encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\AudioEncoder.h">
+      <Filter>Encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\FLVmuxer.h">
+      <Filter>Encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\MP4muxer.h">
+      <Filter>Encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\GraphicsDeviceCaptureD3D11.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\IGraphicsDeviceCapture.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\TextureRender.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Microphone\MicDevices.h">
+      <Filter>Microphone</Filter>
+    </ClInclude>
+    <ClInclude Include="RTMP\LibRTMP.h">
+      <Filter>RTMP</Filter>
+    </ClInclude>
+    <ClInclude Include="Screenshot\ScreenGrab.h">
+      <Filter>Screenshot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NVidia\common\inc\NvHWEncoder.h">
+      <Filter>Encoder\NVENC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\AMFFactory.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\AMFSTL.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStream.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStreamFile.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\DataStreamMemory.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\Thread.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AMD\common\TraceAdapter.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\AMDEncoder.h">
+      <Filter>Encoder\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder\NVEncoder.h">
+      <Filter>Encoder\NVENC</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Graphics\ScreenVertexShader.hlsl">
+      <Filter>Graphics</Filter>
+    </FxCompile>
+    <FxCompile Include="Graphics\ScreenPixelShader.hlsl">
+      <Filter>Graphics</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

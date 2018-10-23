@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\AMD\common\AMFFactory.cpp" />
+    <ClCompile Include="..\AMD\common\AMFSTL.cpp" />
+    <ClCompile Include="..\AMD\common\DataStreamFactory.cpp" />
+    <ClCompile Include="..\AMD\common\DataStreamFile.cpp" />
+    <ClCompile Include="..\AMD\common\DataStreamMemory.cpp" />
+    <ClCompile Include="..\AMD\common\Thread.cpp" />
+    <ClCompile Include="..\AMD\common\TraceAdapter.cpp" />
+    <ClCompile Include="..\AMD\common\Windows\ThreadWindows.cpp" />
+    <ClCompile Include="..\NVidia\common\src\NvHWEncoder.cpp" />
+    <ClCompile Include="Camera\CameraDeviceManager.cpp" />
+    <ClCompile Include="Camera\CameraDevices.cpp" />
+    <ClCompile Include="Camera\CameraReader.cpp" />
+    <ClCompile Include="Common\Log.cpp" />
+    <ClCompile Include="EncoderMain.cpp" />
+    <ClCompile Include="Encoder\AMDEncoder.cpp" />
+    <ClCompile Include="Encoder\AudioBuffer.cpp" />
+    <ClCompile Include="Encoder\AudioCapture.cpp" />
+    <ClCompile Include="Encoder\AudioEncoder.cpp" />
+    <ClCompile Include="Encoder\FLVmuxer.cpp" />
+    <ClCompile Include="Encoder\MP4muxer.cpp" />
+    <ClCompile Include="Encoder\NVEncoder.cpp" />
+    <ClCompile Include="FBCaptureSystem.cpp" />
+    <ClCompile Include="Graphics\GraphicsDeviceCaptureD3D11.cpp" />
+    <ClCompile Include="Graphics\IGraphicsDeviceCapture.cpp" />
+    <ClCompile Include="Graphics\TextureRender.cpp" />
+    <ClCompile Include="Microphone\MicDevices.cpp" />
+    <ClCompile Include="RTMP\LibRTMP.cpp" />
+    <ClCompile Include="Screenshot\ScreenGrab.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\AMD\common\AMFFactory.h" />
+    <ClInclude Include="..\AMD\common\AMFSTL.h" />
+    <ClInclude Include="..\AMD\common\DataStream.h" />
+    <ClInclude Include="..\AMD\common\DataStreamFile.h" />
+    <ClInclude Include="..\AMD\common\DataStreamMemory.h" />
+    <ClInclude Include="..\AMD\common\Thread.h" />
+    <ClInclude Include="..\AMD\common\TraceAdapter.h" />
+    <ClInclude Include="..\NVidia\common\inc\NvHWEncoder.h" />
+    <ClInclude Include="Camera\CameraDeviceManager.h" />
+    <ClInclude Include="Camera\CameraDevices.h" />
+    <ClInclude Include="Camera\CameraReader.h" />
+    <ClInclude Include="Common\Common.h" />
+    <ClInclude Include="Common\Log.h" />
+    <ClInclude Include="Common\ScopedCOMem.h" />
+    <ClInclude Include="Common\ScopedCOMPtr.h" />
+    <ClInclude Include="EncoderMain.h" />
+    <ClInclude Include="Encoder\AMDEncoder.h" />
+    <ClInclude Include="Encoder\AudioBuffer.h" />
+    <ClInclude Include="Encoder\AudioCapture.h" />
+    <ClInclude Include="Encoder\AudioEncoder.h" />
+    <ClInclude Include="Encoder\FLVmuxer.h" />
+    <ClInclude Include="Encoder\MP4muxer.h" />
+    <ClInclude Include="Encoder\NVEncoder.h" />
+    <ClInclude Include="FBCaptureSystem.h" />
+    <ClInclude Include="Graphics\GraphicsDeviceCaptureD3D11.h" />
+    <ClInclude Include="Graphics\IGraphicsDeviceCapture.h" />
+    <ClInclude Include="Graphics\TextureRender.h" />
+    <ClInclude Include="Microphone\MicDevices.h" />
+    <ClInclude Include="RTMP\LibRTMP.h" />
+    <ClInclude Include="Screenshot\ScreenGrab.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Graphics\ScreenPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0_level_9_3</ShaderModel>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">screenPixelShaderCode</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Graphics/ScreenPixelShader.h</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">screenPixelShaderCode</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Graphics/ScreenPixelShader.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Graphics/ScreenPixelShader.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Graphics/ScreenPixelShader.h</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">screenPixelShaderCode</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">screenPixelShaderCode</VariableName>
+    </FxCompile>
+    <FxCompile Include="Graphics\ScreenVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">screenVertexShaderCode</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Graphics/ScreenVertexShader.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Graphics/ScreenVertexShader.h</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">screenVertexShaderCode</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">screenVertexShaderCode</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Graphics/ScreenVertexShader.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Graphics/ScreenVertexShader.h</HeaderFileOutput>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">screenVertexShaderCode</VariableName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0_level_9_3</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0_level_9_3</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F39E9A3B-8A43-4EFE-9BFA-BD0E3ECF86C3}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>NvEncoderD3DInterop_vs2013</RootNamespace>
+    <ProjectName>FBCapture</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>../bin/$(Platform)/$(Configuration)/</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>../bin/$(Platform)/$(Configuration)/</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>../bin/$(Platform)/$(Configuration)/</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>../bin/$(Platform)/$(Configuration)/</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;PATH_MAX=1024;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Wamedia\common\include;$(SolutionDir)Wamedia\streams\include;$(SolutionDir)Wamedia\flvmuxer\include;$(SolutionDir)Wamedia\mp4muxer\include;$(SolutionDir)Spatialmedia;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>librtmp.lib;ws2_32.lib;flvoperations.lib;mp4operations.lib;wamediacommon.lib;wamediastreams.lib;d3d11.lib;dxgi.lib;mfplat.lib;mf.lib;mfuuid.lib;mfreadwrite.lib;mxml1.lib;SpatialMedia.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)RTMP\lib\x86;$(SolutionDir)Wamedia\streams\lib\x86\Debug;$(SolutionDir)Wamedia\common\lib\x86\Debug;$(SolutionDir)Wamedia\flvmuxer\lib\x86\Debug;$(SolutionDir)Wamedia\mp4muxer\lib\x86\Debug;$(SolutionDir)Spatialmedia\lib\$(PlatformTarget)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderType>Pixel</ShaderType>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN64;DEBUG;PATH_MAX=1024;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Wamedia\common\include;$(SolutionDir)Wamedia\streams\include;$(SolutionDir)Wamedia\flvmuxer\include;$(SolutionDir)Wamedia\mp4muxer\include;$(SolutionDir)Spatialmedia;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>librtmp.lib;ws2_32.lib;flvoperations.lib;mp4operations.lib;wamediacommon.lib;wamediastreams.lib;d3d11.lib;dxgi.lib;mfplat.lib;mf.lib;mfuuid.lib;mfreadwrite.lib;spatialmedia.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)RTMP\lib\x64;$(SolutionDir)Wamedia\streams\lib\x64\Debug;$(SolutionDir)Wamedia\common\lib\x64\Debug;$(SolutionDir)Wamedia\flvmuxer\lib\x64\Debug;$(SolutionDir)Wamedia\mp4muxer\lib\x64\Debug;$(SolutionDir)Spatialmedia\lib\$(PlatformTarget)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>4.0_level_9_3</ShaderModel>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;PATH_MAX=1024;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Wamedia\common\include;$(SolutionDir)Wamedia\streams\include;$(SolutionDir)Wamedia\flvmuxer\include;$(SolutionDir)Wamedia\mp4muxer\include;$(SolutionDir)Spatialmedia;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ws2_32.lib;librtmp.lib;flvoperations.lib;mp4operations.lib;wamediacommon.lib;wamediastreams.lib;d3d11.lib;dxgi.lib;mfplat.lib;mf.lib;mfuuid.lib;mfreadwrite.lib;mxml1.lib;SpatialMedia.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)RTMP\lib\x86;$(SolutionDir)Wamedia\streams\lib\x86\Release;$(SolutionDir)Wamedia\common\lib\x86\Release;$(SolutionDir)Wamedia\flvmuxer\lib\x86\Release;$(SolutionDir)Wamedia\mp4muxer\lib\x86\Release;$(SolutionDir)Spatialmedia\lib\$(PlatformTarget)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_WIN64;_NDEBUG;_CRT_SECURE_NO_WARNINGS;PATH_MAX=1024;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Wamedia\common\include;$(SolutionDir)Wamedia\streams\include;$(SolutionDir)Wamedia\flvmuxer\include;$(SolutionDir)Wamedia\mp4muxer\include;$(SolutionDir)Spatialmedia;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ws2_32.lib;librtmp.lib;flvoperations.lib;mp4operations.lib;wamediacommon.lib;wamediastreams.lib;d3d11.lib;dxgi.lib;mfplat.lib;mf.lib;mfuuid.lib;mfreadwrite.lib;spatialmedia.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Wamedia\streams\lib\x64\Release;$(SolutionDir)Wamedia\common\lib\x64\Release;$(SolutionDir)Wamedia\flvmuxer\lib\x64\Release;$(SolutionDir)Wamedia\mp4muxer\lib\x64\Release;$(SolutionDir)RTMP\lib\x64;$(SolutionDir)Spatialmedia\lib\$(PlatformTarget)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderType>Pixel</ShaderType>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
