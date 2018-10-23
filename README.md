@@ -25,6 +25,10 @@
 * Bug fixes, performance improvement and memory optimizations
     * Improved many parts of performance including async texture encoding, memory, and stability on live and vod we got on FBCapture SDK 1.0
 
+## LICENSE
+
+See the [LICENSE](LICENSE) file.
+
 ## Compatibility
 
  1. Hardware AND Software Compatibility
